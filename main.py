@@ -1,49 +1,54 @@
 from typing import Set, Dict
 
 import numpy as np
-from matplotlib import pyplot as plt
 
 from ddcrp.ddcrp import DDCRP
 from ddcrp.prior import NIW, marginal_loglikelihood
 
-import scipy as sp
-import scipy.spatial
+from draw import draw_data, draw_size
 
-from draw import draw_data
-
-num_clusters = 100
+num_clusters = 10
 prior_scale = 5
 cluster_scale = 1
 gamma = 2.5
 num_nodes = 300
-size = np.random.random(size=(num_clusters,)) ** 2.5
-size /= size.sum()
-size *= num_nodes
-size = 1 + size.astype(np.int)
+cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
+cluster_size /= cluster_size.sum()
+cluster_size *= num_nodes
+cluster_size = 1 + cluster_size.astype(np.int)
 
+draw_size(cluster_size)
 
-cluster_list = [
+data_list = [
     np.random.multivariate_normal(
         np.random.multivariate_normal([0, 0], prior_scale * np.identity(2)),
         cluster_scale * np.identity(2),
-        size=s,
+        size=size,
     )
-    for s in size
+    for size in cluster_size
 ]
 
-data = np.concatenate(cluster_list, axis=0)
+cluster_list = [set() for _ in range(num_clusters)]
+count = 0
+for cluster, size in enumerate(cluster_size):
+    for _ in range(size):
+        cluster_list[cluster].add(count)
+        count += 1
+
+
+data = np.concatenate(data_list, axis=0)
 
 data -= data.mean(axis=0)
 data /= data.std(axis=0)
 
-draw_data(data)
+draw_data(data, cluster_list)
 
 
 def logdecay(d1: int, d2: int) -> float:
     return -(abs(data[d1] - data[d2]) ** (0.5)).sum()
 
 
-prior = NIW(1)
+prior = NIW(2)
 loglikelihood_dict: Dict[Set[int], float] = {}
 
 
@@ -52,6 +57,7 @@ def set2str(s: Set[int]) -> str:
 
 
 def loglikelihood(s: Set[int]) -> float:
+    #return 0
     key = set2str(s)
     if key not in loglikelihood_dict:
         loglikelihood_dict[key] = marginal_loglikelihood(prior=prior, data=data[list(s), :])
@@ -70,9 +76,7 @@ cluster_size = []
 for table in ddcrp.assignment.table2customer.values():
     cluster_size.append(len(table))
 
-cluster_size.sort()
-plt.scatter(range(len(cluster_size)), cluster_size)
-plt.show()
+draw_size(cluster_size)
 
 draw_data(data, cluster_list)
 
