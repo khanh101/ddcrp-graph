@@ -22,7 +22,7 @@ plt.show()
 
 
 def decay(d1: int, d2: int) -> float:
-    return 1 / (0.0001 + abs(data[d1] - data[d2]) ** (2))
+    return np.exp(- (data[d1] - data[d2])**2)
 
 
 prior = NIW(1)
@@ -36,7 +36,7 @@ def loglikelihood(s: Set[int]) -> float:
     return loglikelihood_dict[key]
 
 
-ddcrp = DDCRP(len(data), 0.01, decay, loglikelihood)
+ddcrp = DDCRP(len(data), 0.1, decay, loglikelihood)
 
 for i in range(100):
     ddcrp.iterate()
