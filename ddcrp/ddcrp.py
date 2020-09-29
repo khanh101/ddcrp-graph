@@ -9,6 +9,9 @@ customer_nil: Customer = -1
 
 
 class Assignment(object):
+    """
+    Assignment: Contains the graph, table assignment and customer assignment
+    """
     class Node(object):
         parent: Customer
         children: Set[Customer]
@@ -25,6 +28,10 @@ class Assignment(object):
     table_count: Table
 
     def __init__(self, num_customers: Customer):
+        """
+        init default, each customer sits in one table
+        :param num_customers: number of customers
+        """
         super(Assignment, self).__init__()
         self.num_customers = num_customers
         self.graph = [Assignment.Node() for _ in range(num_customers)]
@@ -35,6 +42,10 @@ class Assignment(object):
         self.table_count = num_customers
 
     def weakly_connected_component(self, customer: Customer) -> Set[Customer]:
+        """
+        :param customer: a customer
+        :return: weakly connected component links to that customer
+        """
         subtree_node_set: Set[Customer] = set()
         frontier: List[Customer] = [customer]
         while len(frontier) > 0:
@@ -46,8 +57,12 @@ class Assignment(object):
                     frontier.append(node)
         return subtree_node_set
 
-
     def unlink(self, customer: Customer):
+        """
+        unlink a customer from its parent
+        :param customer:
+        :return:
+        """
         if self.graph[customer].parent != customer_nil:
             # remove link
             self.graph[self.graph[customer].parent].children.remove(customer)
@@ -68,13 +83,18 @@ class Assignment(object):
             for node in component:
                 self.customer2table[node] = next_table
 
-
     def link(self, source: Customer, target: Customer):
+        """
+        link source customer to target customer
+        :param source: source
+        :param target: target
+        :return:
+        """
         source_component: Set[Customer] = self.weakly_connected_component(source)
         if target in source_component:
             self.graph[source].parent = target
             self.graph[target].children.add(source)
-        else: # join
+        else:  # join
             target_component: Set[Customer] = self.weakly_connected_component(target)
             self.graph[source].parent = target
             self.graph[target].children.add(source)
@@ -91,44 +111,62 @@ class Assignment(object):
             self.table2customer[new_table] = new_component
 
 
-
 class DDCRP(object):
+    """
+    DDCRP : Distance Dependent Chinese Restaurant Process
+    """
     num_customers: Customer
     assignment: Assignment
+
     def __init__(self, num_customers: Customer):
+        """
+        :param num_customers: number of customers
+        """
         super(DDCRP, self).__init__()
         self.num_customers = num_customers
         self.assignment = Assignment(num_customers=num_customers)
 
     def iterate(self,
-            logalpha: float,
-            logdecay_func: Callable[[Customer, Customer], float],
-            loglikelihood_func: Callable[[Set[Customer]], float],
-    ):
+                logalpha: float,
+                logdecay_func: Callable[[Customer], Dict[Customer, float]],
+                loglikelihood_func: Callable[[Set[Customer]], float],
+        ):
+        """
+        :param logalpha: log(alpha), alpha
+        :param logdecay_func: a function returns a dict of target and the associate non(-inf) logdecay
+        :param loglikelihood_func: a function returns marginal log likelihood of a table
+        :return:
+        """
         for source in range(self.num_customers):
+            logdecay_dict: Dict[Customer, float] = logdecay_func(source)
             self.assignment.unlink(source)
-            logweight: List[float] = []
-            for target in range(self.num_customers):
-                if source == target: # self loop
-                    logweight.append(logalpha)
+            target_list: List[Customer] = [source] + list(logdecay_dict.keys())
+            logweight_list: List[float] = []
+            # only calculate probablities on reachable customers (defined logdecay)
+            for target in target_list:
+                if source == target:  # self loop
+                    logweight_list.append(logalpha)
                 else:
                     source_component: Set[Customer] = self.assignment.weakly_connected_component(source)
-                    logdecay: float = logdecay_func(source, target)
-                    if target in source_component: # no join
-                        logweight.append(logdecay)
-                    else: # join
+                    logdecay: float = logdecay_dict[target]
+                    if target in source_component:  # no table join
+                        logweight_list.append(logdecay)
+                    else:  # table join
                         target_component: Set[Customer] = self.assignment.weakly_connected_component(target)
                         source_loglikelihood: float = loglikelihood_func(source_component)
                         target_loglikelihood: float = loglikelihood_func(target_component)
-                        join_loglikelihood: float = loglikelihood_func(set(list(source_component) + list(target_component)))
-                        logweight.append(
+                        join_loglikelihood: float = loglikelihood_func(
+                            set(list(source_component) + list(target_component))
+                        )
+                        logweight_list.append(
                             logdecay + join_loglikelihood - source_loglikelihood - target_loglikelihood,
                         )
             # sample
-            max_lw: float = max(logweight)
-            logweight: List[float] = [lw - max_lw for lw in logweight] # divide weight by a constant
-            weight: List[float] = [math.exp(lw) for lw in logweight]
-            target: Customer = random.choices(range(self.num_customers), weights=weight, k=1)[0]
+            max_lw: float = max(logweight_list)
+            # divide weight by a constant to avoid overflow
+            logweight_list: List[float] = [lw - max_lw for lw in logweight_list]
+            weight_list: List[float] = [math.exp(lw) for lw in logweight_list]
+            target: Customer = random.choices(target_list, weights=weight_list, k=1)[0]
             self.assignment.link(source, target)
 
 
@@ -147,7 +185,6 @@ if __name__ == "__main__":
         1: {4},
     }
     a.customer2table = [0, 0, 0, 0, 1]
-
 
     a.unlink(1)
     a.link(1, 4)

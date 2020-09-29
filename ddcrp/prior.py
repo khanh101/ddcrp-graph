@@ -1,25 +1,39 @@
-import math
+from typing import Any
 
 import numpy as np
 import scipy as sp
 import scipy.special
 
 class NIW(object):
+    """
+    Normal-Inverse-Wishart Prior Hyperparameters
+    """
     dim: int
     m: np.ndarray
     k: float
     v: int
     S: np.ndarray
     def __init__(self, dim: int):
+        """
+        init the param
+        Murphy: Machine learning - a probabilistic perspective
+        Sect. 4.6.3.2
+        :param dim: dimension
+        """
         super(NIW, self).__init__()
         self.dim = dim
         self.m = np.zeros(shape=(1, dim))
         self.k = 0.01
         self.v = dim + 2
-        #self.S = np.zeros(shape=(dim, dim))
         self.S = np.identity(dim)
 
-    def posterior(self, data: np.ndarray): # shape (n x d)
+    def posterior(self, data: np.ndarray) -> Any:
+        """
+        Murphy: Machine learning - a probabilistic perspective
+        Sect. 4.6.3.3
+        :param data: (n x d) array
+        :return:
+        """
         n, d = data.shape
         data_mean = data.mean(axis=0).reshape((1, d))
         out = NIW(self.dim)
@@ -31,6 +45,12 @@ class NIW(object):
         return out
 
 def marginal_loglikelihood(prior: NIW, data: np.ndarray) -> float:
+    """
+    Ref. https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf page 21: Marginal likelihood
+    :param prior: NIW prior
+    :param data: (n x d) array
+    :return: marginal loglikelihood log(P(data))
+    """
     n, d = data.shape
     posterior = prior.posterior(data)
     out: float = - (n * d / 2) * np.log(np.pi)

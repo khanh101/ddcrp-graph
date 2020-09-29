@@ -44,8 +44,11 @@ data /= data.std(axis=0)
 draw_data(data, cluster_list)
 
 
-def logdecay(d1: int, d2: int) -> float:
-    return -(abs(data[d1] - data[d2]) ** (0.5)).sum()
+def logdecay(d1: int) -> Dict[int, float]:
+    out: Dict[int, float] = {}
+    for d2 in range(num_nodes):
+        out[d2] = -(abs(data[d1] - data[d2]) ** (0.5)).sum()
+    return out
 
 
 prior = NIW(2)
