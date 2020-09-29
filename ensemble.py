@@ -3,10 +3,12 @@ from typing import List, Set
 import numpy as np
 
 class Ensemble(object):
+    num_items: int
     count: int
     similarity_count: np.ndarray
     def __init__(self, num_items: int):
         super(Ensemble, self).__init__()
+        self.num_items = num_items
         self.count = 0
         self.similarity_count = np.zeros((num_items, num_items))
 
@@ -19,3 +21,4 @@ class Ensemble(object):
 
     def similarity(self) -> np.ndarray:
         return self.similarity_count / self.count
+
