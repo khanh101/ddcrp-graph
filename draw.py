@@ -5,15 +5,18 @@ import scipy as sp
 import scipy.spatial
 import matplotlib.pyplot as plt
 
+def draw_mat(a: np.ndarray):
+    plt.matshow(a)
+    plt.show()
+
 
 def draw_size(size_list: List[int]):
     size_list_sorted = sorted(size_list)
-    plt.scatter(range(len(size_list_sorted)), size_list_sorted)
+    plt.plot(range(len(size_list_sorted)), size_list_sorted)
     plt.show()
 
 
 def draw_data(data: np.ndarray, cluster_list: List[Set[int]] = []):
-    plt.figure(figsize=(8.0, 8.0))
     plt.scatter(data[:, 0], data[:, 1], s=2)
 
     for cluster in cluster_list:

@@ -5,18 +5,20 @@ import numpy as np
 from ddcrp.ddcrp import DDCRP
 from ddcrp.prior import NIW, marginal_loglikelihood
 
-from draw import draw_data, draw_size
+from draw import draw_data, draw_size, draw_mat
+from ensemble import Ensemble
+from util import set2str
 
 num_clusters = 10
 prior_scale = 5
 cluster_scale = 1
 gamma = 2.5
-num_nodes = 300
+num_points = 300
 cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
 cluster_size /= cluster_size.sum()
-cluster_size *= num_nodes
+cluster_size *= num_points
 cluster_size = 1 + cluster_size.astype(np.int)
-
+num_points = sum(cluster_size)
 draw_size(cluster_size)
 
 data_list = [
@@ -45,7 +47,7 @@ draw_data(data, cluster_list)
 
 def logdecay(d1: int) -> Dict[int, float]:
     out: Dict[int, float] = {}
-    for d2 in range(num_nodes):
+    for d2 in range(num_points):
         out[d2] = -(abs(data[d1] - data[d2]) ** (0.5)).sum()
     return out
 
@@ -55,9 +57,6 @@ loglikelihood_dict: Dict[str, float] = {}
 
 
 def loglikelihood(s: Set[int]) -> float:
-    def set2str(s: Set[int]) -> str:
-        return "#".join([str(i) for i in sorted(list(s))])
-
     key = set2str(s)
     if key not in loglikelihood_dict:
         loglikelihood_dict[key] = marginal_loglikelihood(prior=prior, data=data[list(s), :])
@@ -66,9 +65,15 @@ def loglikelihood(s: Set[int]) -> float:
 
 ddcrp = DDCRP(len(data))
 
+ens = Ensemble(num_points)
+
 for i in range(10):
     ddcrp.iterate(-float("inf"), logdecay, loglikelihood)
+    ens.add(list(ddcrp.assignment.table2customer.values()))
     print(f"iter {i} num clusters {len(ddcrp.assignment.table2customer)}")
+
+
+draw_mat(ens.similarity())
 
 cluster_list = list(ddcrp.assignment.table2customer.values())
 
