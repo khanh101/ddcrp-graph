@@ -21,8 +21,8 @@ plt.bar(bin_edge[:len(hist)], hist)
 plt.show()
 
 
-def decay(d1: int, d2: int) -> float:
-    return np.exp(- (data[d1] - data[d2])**2)
+def logdecay(d1: int, d2: int) -> float:
+    return -(data[d1] - data[d2])**2
 
 
 prior = NIW(1)
@@ -36,7 +36,7 @@ def loglikelihood(s: Set[int]) -> float:
     return loglikelihood_dict[key]
 
 
-ddcrp = DDCRP(len(data), 0.1, decay, loglikelihood)
+ddcrp = DDCRP(len(data), -1, logdecay, loglikelihood)
 
 for i in range(100):
     ddcrp.iterate()
