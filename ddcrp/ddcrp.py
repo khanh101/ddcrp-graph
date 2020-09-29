@@ -95,39 +95,32 @@ class Assignment(object):
 class DDCRP(object):
     num_customers: Customer
     assignment: Assignment
-    logalpha: float
-    logdecay_func: Callable[[Customer, Customer], float]
-    loglikelihood_func: Callable[[Set[Customer]], float]
-    def __init__(self,
-                 num_customers: Customer,
-                 logalpha: float,
-                 logdecay_func: Callable[[Customer, Customer], float],
-                 loglikelihood_func: Callable[[Set[Customer]], float],
-        ):
+    def __init__(self, num_customers: Customer):
         super(DDCRP, self).__init__()
         self.num_customers = num_customers
         self.assignment = Assignment(num_customers=num_customers)
-        self.logalpha = logalpha
-        self.logdecay_func = logdecay_func
-        self.loglikelihood_func = loglikelihood_func
 
-    def iterate(self):
+    def iterate(self,
+            logalpha: float,
+            logdecay_func: Callable[[Customer, Customer], float],
+            loglikelihood_func: Callable[[Set[Customer]], float],
+    ):
         for source in range(self.num_customers):
             self.assignment.unlink(source)
             logweight: List[float] = []
             for target in range(self.num_customers):
                 if source == target: # self loop
-                    logweight.append(self.logalpha)
+                    logweight.append(logalpha)
                 else:
                     source_component: Set[Customer] = self.assignment.weakly_connected_component(source)
-                    logdecay: float = self.logdecay_func(source, target)
+                    logdecay: float = logdecay_func(source, target)
                     if target in source_component: # no join
                         logweight.append(logdecay)
                     else: # join
                         target_component: Set[Customer] = self.assignment.weakly_connected_component(target)
-                        source_loglikelihood: float = self.loglikelihood_func(source_component)
-                        target_loglikelihood: float = self.loglikelihood_func(target_component)
-                        join_loglikelihood: float = self.loglikelihood_func(set(list(source_component) + list(target_component)))
+                        source_loglikelihood: float = loglikelihood_func(source_component)
+                        target_loglikelihood: float = loglikelihood_func(target_component)
+                        join_loglikelihood: float = loglikelihood_func(set(list(source_component) + list(target_component)))
                         logweight.append(
                             logdecay + join_loglikelihood - source_loglikelihood - target_loglikelihood,
                         )
