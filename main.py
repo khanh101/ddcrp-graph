@@ -6,23 +6,24 @@ from matplotlib import pyplot as plt
 from ddcrp.ddcrp import DDCRP
 from ddcrp.prior import NIW, marginal_loglikelihood
 
-cluster1 = np.random.normal(loc=-2, scale=1, size=(50,))
-cluster2 = np.random.normal(loc=+2, scale=1, size=(50,))
+import scipy as sp
+import scipy.spatial
+
+identity = [
+    [0.5, 0],
+    [0, 0.5],
+]
+cluster1 = np.random.multivariate_normal([-2, -2], identity, size=(200,))
+cluster2 = np.random.multivariate_normal([+2, +2], identity, size=(200,))
 
 data = np.concatenate((cluster1, cluster2), axis=0)
-data = np.sort(data)
 
-plt.scatter(range(len(data)), data)
-plt.show()
-
-
-hist, bin_edge = np.histogram(data, bins=20)
-plt.bar(bin_edge[:len(hist)], hist)
+plt.scatter(data[:, 0], data[:, 1])
 plt.show()
 
 
 def logdecay(d1: int, d2: int) -> float:
-    return -(data[d1] - data[d2])**2
+    return -(abs(data[d1] - data[d2])**(2.0)).sum()
 
 
 prior = NIW(1)
@@ -32,18 +33,30 @@ def set2str(s: Set[int]) -> str:
 def loglikelihood(s: Set[int]) -> float:
     key = set2str(s)
     if key not in loglikelihood_dict:
-        loglikelihood_dict[key] = marginal_loglikelihood(prior=prior, data=data[list(s)].reshape((len(s), 1)))
+        loglikelihood_dict[key] = marginal_loglikelihood(prior=prior, data=data[list(s), :])
     return loglikelihood_dict[key]
 
 
-ddcrp = DDCRP(len(data), -1, logdecay, loglikelihood)
+ddcrp = DDCRP(len(data), -float("inf"), logdecay, loglikelihood)
 
-for i in range(100):
+for i in range(10):
     ddcrp.iterate()
-    print(f"num clusters {len(ddcrp.assignment.table2customer)}")
-    for table in ddcrp.assignment.table2customer.values():
-        plt.scatter(list(table), data[list(table)])
-    plt.show()
+    print(f"iter {i} num clusters {len(ddcrp.assignment.table2customer)}")
+cluster_size = []
+for table in ddcrp.assignment.table2customer.values():
+    cluster_size.append(len(table))
+    cluster = data[list(table), :]
+    if len(table) < 3:
+        plt.plot(cluster[:, 0], cluster[:, 1])
+    else:
+        hull = sp.spatial.ConvexHull(cluster)
+        vertices = list(hull.vertices) + [hull.vertices[0]]
+        plt.plot(cluster[vertices, 0], cluster[vertices, 1])
 
+plt.show()
+
+cluster_size.sort()
+plt.scatter(range(len(cluster_size)), cluster_size)
+plt.show()
 
 pass
