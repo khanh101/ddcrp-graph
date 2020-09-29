@@ -3,8 +3,8 @@ from typing import Set, Dict
 import numpy as np
 from matplotlib import pyplot as plt
 
-from ddcrp import DDCRP
-from prior import NIW, marginal_loglikelihood
+from ddcrp.ddcrp import DDCRP
+from ddcrp.prior import NIW, marginal_loglikelihood
 
 cluster1 = np.random.normal(loc=-2, scale=1, size=(50,))
 cluster2 = np.random.normal(loc=+2, scale=1, size=(50,))
