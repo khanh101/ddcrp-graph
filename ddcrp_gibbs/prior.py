@@ -4,14 +4,14 @@ import numpy as np
 import scipy as sp
 import scipy.special
 
-class NIWParam(object):
+class NIW(object):
     dim: int
     m: np.ndarray
     k: float
     v: int
     S: np.ndarray
     def __init__(self, dim: int):
-        super(NIWParam, self).__init__()
+        super(NIW, self).__init__()
         self.dim = dim
         self.m = np.zeros(shape=(1, dim))
         self.k = 0.01
@@ -22,7 +22,7 @@ class NIWParam(object):
     def posterior(self, data: np.ndarray): # shape (n x d)
         n, d = data.shape
         data_mean = data.mean(axis=0).reshape((1, d))
-        out = NIWParam(self.dim)
+        out = NIW(self.dim)
         out.m = (self.k / (self.k + n)) * self.m + (n / (self.k + n)) * data_mean
         out.k = self.k + n
         out.v = self.v + n
@@ -30,7 +30,7 @@ class NIWParam(object):
         out.S = self.S + S + self.k * self.m.T.__matmul__(self.m) - out.k * out.m.T.__matmul__(out.m)
         return out
 
-def marginal_loglikelihood(prior: NIWParam, data: np.ndarray) -> float:
+def marginal_loglikelihood(prior: NIW, data: np.ndarray) -> float:
     n, d = data.shape
     posterior = prior.posterior(data)
     out: float = - (n * d / 2) * np.log(np.pi)
@@ -42,7 +42,7 @@ def marginal_loglikelihood(prior: NIWParam, data: np.ndarray) -> float:
 
 if __name__ == "__main__":
     data = np.random.random(size=(200, 50))
-    prior = NIWParam(50)
+    prior = NIW(50)
     while True:
         print(marginal_loglikelihood(prior, data))
         prior = prior.posterior(data)
