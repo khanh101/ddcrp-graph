@@ -35,7 +35,6 @@ for cluster, size in enumerate(cluster_size):
         cluster_list[cluster].add(count)
         count += 1
 
-
 data = np.concatenate(data_list, axis=0)
 
 data -= data.mean(axis=0)
@@ -52,15 +51,13 @@ def logdecay(d1: int) -> Dict[int, float]:
 
 
 prior = NIW(2)
-loglikelihood_dict: Dict[Set[int], float] = {}
-
-
-def set2str(s: Set[int]) -> str:
-    return "#".join([str(i) for i in sorted(list(s))])
+loglikelihood_dict: Dict[str, float] = {}
 
 
 def loglikelihood(s: Set[int]) -> float:
-    #return 0
+    def set2str(s: Set[int]) -> str:
+        return "#".join([str(i) for i in sorted(list(s))])
+
     key = set2str(s)
     if key not in loglikelihood_dict:
         loglikelihood_dict[key] = marginal_loglikelihood(prior=prior, data=data[list(s), :])

@@ -128,17 +128,17 @@ class DDCRP(object):
 
     def iterate(self,
                 logalpha: float,
-                logdecay_func: Callable[[Customer], Dict[Customer, float]],
+                logdecaydict_func: Callable[[Customer], Dict[Customer, float]],
                 loglikelihood_func: Callable[[Set[Customer]], float],
-        ):
+                ):
         """
         :param logalpha: log(alpha), alpha
-        :param logdecay_func: a function returns a dict of target and the associate non(-inf) logdecay
+        :param logdecaydict_func: a function returns a dict of target and the associate non(-inf) logdecay
         :param loglikelihood_func: a function returns marginal log likelihood of a table
         :return:
         """
         for source in range(self.num_customers):
-            logdecay_dict: Dict[Customer, float] = logdecay_func(source)
+            logdecay_dict: Dict[Customer, float] = logdecaydict_func(source)
             self.assignment.unlink(source)
             target_list: List[Customer] = [source] + list(logdecay_dict.keys())
             logweight_list: List[float] = []
