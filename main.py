@@ -2,6 +2,7 @@ from typing import Set, Dict
 
 import numpy as np
 
+from clustering import spectral_clustering
 from ddcrp.ddcrp import DDCRP
 from ddcrp.prior import NIW, marginal_loglikelihood
 
@@ -67,22 +68,24 @@ ddcrp = DDCRP(len(data))
 
 ens = Ensemble(num_points)
 
-for i in range(10):
+num_clusters: int = 0
+num_iterations: int = 10
+for i in range(num_iterations):
     ddcrp.iterate(-float("inf"), logdecay, loglikelihood)
     ens.add(list(ddcrp.assignment.table2customer.values()))
-    print(f"iter {i} num clusters {len(ddcrp.assignment.table2customer)}")
+    max_misclustering_rate: float = ens.misclustering_rate().mean()
+    print(f"iter {i} num clusters {len(ddcrp.assignment.table2customer)} misclustering_rate {max_misclustering_rate}")
+    num_clusters += len(ddcrp.assignment.table2customer)
 
+num_clusters = int(num_clusters / num_iterations)
 
 draw_mat(ens.similarity())
+draw_mat(ens.misclustering_rate())
 
-cluster_list = list(ddcrp.assignment.table2customer.values())
+A = ens.similarity() * (1.0 - np.identity(num_points))
+cluster_list = spectral_clustering(A, int(np.log(num_points)), num_clusters)
 
-cluster_size = []
-for table in ddcrp.assignment.table2customer.values():
-    cluster_size.append(len(table))
-
-draw_size(cluster_size)
+draw_size([len(cluster) for cluster in cluster_list])
 
 draw_data(data, cluster_list)
 
-pass
