@@ -22,3 +22,5 @@ class Ensemble(object):
     def similarity(self) -> np.ndarray:
         return self.similarity_count / self.count
 
+    def misclustering_rate(self) -> np.ndarray:
+        return 0.5 - abs(self.similarity() - 0.5)
