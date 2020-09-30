@@ -2,13 +2,13 @@ from typing import Set, Dict
 
 import numpy as np
 
-from clustering import spectral_clustering
-from ddcrp.ddcrp import DDCRP
-from ddcrp.prior import NIW, marginal_loglikelihood
+from python.clustering import spectral_clustering
+from python.ddcrp.ddcrp import DDCRP
+from python.ddcrp.prior import NIW, marginal_loglikelihood
 
-from draw import draw_data, draw_size, draw_mat
-from ensemble import Ensemble
-from util import set2str
+from python.draw import draw_data, draw_size, draw_mat
+from python.ensemble import Ensemble
+from python.util import set2str
 
 num_clusters = 10
 prior_scale = 5
