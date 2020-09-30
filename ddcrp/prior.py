@@ -13,6 +13,25 @@ class NIW(object):
     k: float
     v: int
     S: np.ndarray
+    # precompute
+    __gamma_d_v_2: float
+    __logdet_S: float
+    __log_k: float
+    def gamma_d_v_2(self) -> float:
+        if self.__gamma_d_v_2 is None:
+            self.__gamma_d_v_2 = sp.special.multigammaln(self.v / 2, self.dim)
+        return self.__gamma_d_v_2
+
+    def logdet_S(self) -> float:
+        if self.__logdet_S is None:
+            self.__logdet_S = np.linalg.slogdet(self.S)[1]
+        return self.__logdet_S
+
+    def log_k(self) -> float:
+        if self.__log_k is None:
+            self.__log_k = np.log(self.k)
+        return self.__log_k
+
     def __init__(self, dim: int):
         """
         init the param
@@ -26,6 +45,10 @@ class NIW(object):
         self.k = 0.01
         self.v = dim + 2
         self.S = np.identity(dim)
+        # precompute
+        self.__gamma_d_v_2 = None
+        self.__logdet_S = None
+        self.__log_k = None
 
     def posterior(self, data: np.ndarray) -> Any:
         """
@@ -44,6 +67,8 @@ class NIW(object):
         out.S = self.S + S + self.k * self.m.T.__matmul__(self.m) - out.k * out.m.T.__matmul__(out.m)
         return out
 
+
+log_pi: float = np.log(np.pi)
 def marginal_loglikelihood(prior: NIW, data: np.ndarray) -> float:
     """
     Ref. https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf page 21: Marginal likelihood
@@ -53,10 +78,13 @@ def marginal_loglikelihood(prior: NIW, data: np.ndarray) -> float:
     """
     n, d = data.shape
     posterior = prior.posterior(data)
-    out: float = - (n * d / 2) * np.log(np.pi)
-    out += sp.special.multigammaln(posterior.v / 2, d) - sp.special.multigammaln(prior.v / 2, d)
-    out += (prior.v / 2) * np.linalg.slogdet(prior.S)[1] - (posterior.v / 2) * np.linalg.slogdet(posterior.S)[1]
-    out += (d / 2) * (np.log(prior.k) - np.log(posterior.k))
+    out: float = - (n * d / 2) * log_pi
+    #out += sp.special.multigammaln(posterior.v / 2, d) - sp.special.multigammaln(prior.v / 2, d)
+    out += posterior.gamma_d_v_2() - prior.gamma_d_v_2()
+    #out += (prior.v / 2) * np.linalg.slogdet(prior.S)[1] - (posterior.v / 2) * np.linalg.slogdet(posterior.S)[1]
+    out += (prior.v / 2) * prior.logdet_S() - (posterior.v / 2) * posterior.logdet_S()
+    #out += (d / 2) * (np.log(prior.k) - np.log(posterior.k))
+    out += (d / 2) * (prior.log_k() - posterior.log_k())
     return out
 
 
