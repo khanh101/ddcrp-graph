@@ -16,6 +16,7 @@ cluster_size /= cluster_size.sum()
 cluster_size *= num_points
 cluster_size = 1 + cluster_size.astype(np.int)
 num_points = sum(cluster_size)
+num_edges = 100 * num_points
 draw_size(cluster_size)
 
 data_list = [
@@ -44,10 +45,17 @@ draw_data(data, cluster_list)
 adj = np.empty((num_points, num_points))
 for i in range(num_points):
     for j in range(num_points):
-        adj[i][j] = - 1000 * ((data[i] - data[j])**2).sum()
-print(adj.max())
-print(adj.min())
+        adj[i][j] = - 10000 * ((data[i] - data[j])**2).sum()
+
+edge_list = list(adj.reshape((num_points*num_points)))
+edge_list.sort()
+edge_list.reverse()
+cutoff = edge_list[num_edges]
+adj[adj < cutoff] = 0
+
 adj = sp.sparse.coo_matrix(adj)
+adj.eliminate_zeros()
+print(len(adj.data))
 cluster_list = clustering(1234, 10, data, -float("inf"), adj)
 
 draw_size([len(cluster) for cluster in cluster_list])
