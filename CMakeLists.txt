@@ -13,6 +13,12 @@ add_library(ddcrp_gibbs SHARED
 add_executable(ddcrp_gibbs_main cpp/main.cpp)
 target_link_libraries(ddcrp_gibbs_main ddcrp_gibbs)
 
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    message(" ")
+    message("CMAKE IN DEBUG MODE")
+    message(" ")
+elseif(CMAKE_BUILD_TYPE MATCHES Release)
+    message(" ")
+    message("CMAKE IN RELEASE MODE")
+    message(" ")
+endif ()
