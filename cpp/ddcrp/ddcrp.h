@@ -38,8 +38,8 @@ public:
     };
     uint64 m_num_customers;
     std::vector<Node> graph;
-    std::map<Table, std::set<Customer>> table2customer;
-    std::vector<Table> customer2table;
+    //std::map<Table, std::set<Customer>> table2customer;
+    //std::vector<Table> customer2table;
     Table table_count;
 };
 
@@ -51,12 +51,13 @@ Assignment::Assignment(Customer num_customers) :
 //:param num_customers: number of customers
         m_num_customers(num_customers),
         graph(),
-        table2customer(),
-        customer2table(),
+        //table2customer(),
+        //customer2table(),
         table_count(num_customers) {
     for (Customer customer = 0; customer < num_customers; customer++) {
         graph.emplace_back();
     }
+    /*
     for (Customer customer = 0; customer < num_customers; customer++) {
         Table table = customer;
         table2customer.insert(std::make_pair(table, std::set({customer})));
@@ -65,6 +66,7 @@ Assignment::Assignment(Customer num_customers) :
         Table table = customer;
         customer2table.push_back(table);
     }
+     */
 }
 
 std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
@@ -100,6 +102,7 @@ void Assignment::unlink(Customer customer) {
     // remove link
     graph[graph[customer].m_parent].m_children.erase(customer);
     graph[customer].m_parent = customer_nil;
+    /*
     // find weakly connected component
     auto component = weakly_connected_component(customer);
     // remove component from prev table
@@ -117,11 +120,13 @@ void Assignment::unlink(Customer customer) {
     for (auto c_customer: component) {
         customer2table[c_customer] = next_table;
     }
+     */
 }
 
 void Assignment::link(Customer source, Customer target) {
     graph[source].m_parent = target;
     graph[target].m_children.insert(source);
+    /*
     auto source_component = weakly_connected_component(source);
     if (not source_component.contains(target)) {
         auto target_component = weakly_connected_component(target);
@@ -138,6 +143,7 @@ void Assignment::link(Customer source, Customer target) {
         }
         table2customer.insert(std::make_pair(new_table, new_component));
     }
+    */
 }
 template <typename UniformRandomNumberGenerator>
 void ddcrp_iterate(

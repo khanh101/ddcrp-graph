@@ -23,10 +23,11 @@ class Assignment(object):
 
     num_customers: Customer
     graph: List[Node]
+    '''
     table2customer: Dict[Table, Set[Customer]]
     customer2table: List[Table]
     table_count: Table
-
+    '''
     def __init__(self, num_customers: Customer):
         """
         init default, each customer sits in one table
@@ -35,11 +36,13 @@ class Assignment(object):
         super(Assignment, self).__init__()
         self.num_customers = num_customers
         self.graph = [Assignment.Node() for _ in range(num_customers)]
+        '''
         self.customer2table = [customer for customer in range(num_customers)]
         self.table2customer = {}
         for customer in range(num_customers):
             self.table2customer[customer] = {customer}
         self.table_count = num_customers
+        '''
 
     def weakly_connected_component(self, customer: Customer) -> Set[Customer]:
         """
@@ -67,6 +70,7 @@ class Assignment(object):
             # remove link
             self.graph[self.graph[customer].parent].children.remove(customer)
             self.graph[customer].parent = customer_nil
+            '''
             # find weakly connected component of customer
             component: Set[Customer] = self.weakly_connected_component(customer)
             # remove from prev table
@@ -82,6 +86,7 @@ class Assignment(object):
             # update table label
             for node in component:
                 self.customer2table[node] = next_table
+            '''
 
     def link(self, source: Customer, target: Customer):
         """
@@ -90,14 +95,12 @@ class Assignment(object):
         :param target: target
         :return:
         """
+        self.graph[source].parent = target
+        self.graph[target].children.add(source)
+        '''
         source_component: Set[Customer] = self.weakly_connected_component(source)
-        if target in source_component:
-            self.graph[source].parent = target
-            self.graph[target].children.add(source)
-        else:  # join
+        if target not in source_component:
             target_component: Set[Customer] = self.weakly_connected_component(target)
-            self.graph[source].parent = target
-            self.graph[target].children.add(source)
             # remove 2 old tables
             source_table: Table = self.customer2table[source]
             target_table: Table = self.customer2table[target]
@@ -109,6 +112,17 @@ class Assignment(object):
             for customer in new_component:
                 self.customer2table[customer] = new_table
             self.table2customer[new_table] = new_component
+        '''
+    def table(self) -> List[Set[Customer]]:
+        visited: Set[Customer] = set()
+        out: List[Set[Customer]] = []
+        for customer in range(self.num_customers):
+            if customer not in visited:
+                component = self.weakly_connected_component(customer)
+                out.append(component)
+                for customer in component:
+                    visited.add(customer)
+        return out
 
 
 class DDCRP(object):
