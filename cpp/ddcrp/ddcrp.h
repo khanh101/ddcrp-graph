@@ -32,6 +32,8 @@ public:
 
     [[nodiscard]] std::set<Customer> table(Customer customer) const;
 
+    [[nodiscard]] std::vector<std::set<Customer>> table_list() const;
+
 private:
     struct Node {
         Customer m_parent;
@@ -165,21 +167,29 @@ std::set<Customer> Assignment::table(Customer customer) const {
     return m_table_list.find(m_table_assignment[customer])->second;
 }
 
+std::vector<std::set<Customer>> Assignment::table_list() const {
+    auto out = std::vector<std::set<Customer>>();
+    out.reserve(m_table_list.size());
+    for (const auto& it: m_table_list) {
+        out.push_back(it.second);
+    }
+    return out;
+}
+
 template<typename UnitRNG>
 void ddcrp_iterate(
         UnitRNG gen,
         Assignment &assignment,
         float64 logalpha, // log(alpha)
-        const std::vector<std::map<Customer, float64>> &logdecay_func, // logdecay = logdecay_func[customer1][customer2]
-        const std::function<float64(
-                const std::set<Customer> &customer_list)> &loglikelihood_func // loglikelihood of a compoentn
+        const std::function<std::map<Customer, float64>(Customer customer)>& logdecay_func, // logdecay = logdecay_func[customer1][customer2]
+        const std::function<float64(const std::set<Customer> &customer_list)>& loglikelihood_func // loglikelihood of a compoentn
 ) {
     auto target_list = std::vector<Customer>();
     auto logweight_list = std::vector<float64>();
     target_list.reserve(assignment.num_customers());
     logweight_list.reserve(assignment.num_customers());
     for (Customer source = 0; source < assignment.num_customers(); source++) {
-        auto &logdecay_map = logdecay_func[source];
+        auto logdecay_map = logdecay_func(source);
         target_list.clear();
         for (auto it = logdecay_map.begin(); it != logdecay_map.end(); ++it) {
             target_list.push_back(it->first);

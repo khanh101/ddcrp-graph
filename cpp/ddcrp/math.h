@@ -6,6 +6,7 @@
 
 #include<numbers>
 #include <cmath>
+#include <random>
 #include "common.h"
 
 namespace math {
@@ -59,6 +60,7 @@ namespace math {
         }
         return weight.size();
     }
+
 }
 
 #endif //DDCRP_GIBBS_MATH_H
