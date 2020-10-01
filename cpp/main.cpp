@@ -2,13 +2,14 @@
 // Created by khanh on 30/9/20.
 //
 
+#include <iostream>
 #include "ddcrp_c.h"
 
 int main(int argc, char** argv) {
     uint64 n = 300;
     uint64 d = 2;
 
-    Eigen::MatrixXd data = Eigen::MatrixXd::Random(2, 300);
+    Eigen::MatrixXd data = Eigen::MatrixXd::Random(d, n);
 
     auto niw = NIW(d);
     auto ddcrp = Assignment(n);
@@ -33,7 +34,8 @@ int main(int argc, char** argv) {
         return 0;
     };
     for (int i=0; i<10; i++) {
-    ddcrp_iterate(
+        std::cout << i << std::endl;
+        ddcrp_iterate(
             e,
             ddcrp,
             -std::numeric_limits<float64>::infinity(),

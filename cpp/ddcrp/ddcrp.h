@@ -214,6 +214,7 @@ void ddcrp_iterate(
         for (uint64 i=0; i<logweight_list.size(); i++) {
             weight_list[i] = math::exp(logweight_list[i] - max_logweight);
         }
+
         auto dist = std::discrete_distribution<uint64>(weight_list.begin(), weight_list.end());
         Customer target = target_list[dist(gen)];
         assignment.link(source, target);
