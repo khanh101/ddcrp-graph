@@ -10,7 +10,7 @@ num_clusters = 10 # 3
 prior_scale = 5
 cluster_scale = 1
 gamma = 2.5
-num_points = 500 # 10
+num_points = 1000 # 10
 cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
 cluster_size /= cluster_size.sum()
 cluster_size *= num_points
@@ -50,12 +50,25 @@ for i in range(num_points):
 edge_list = list(adj.reshape((num_points*num_points)))
 edge_list.sort()
 edge_list.reverse()
+max_edge = edge_list[0]
+print(f"max_edge: {max_edge}")
 cutoff = edge_list[num_edges]
-adj[adj < cutoff] = 0
 
-adj = sp.sparse.coo_matrix(adj)
-adj.eliminate_zeros()
-print(len(adj.data))
+row = []
+col = []
+edge = []
+for i in range(num_points):
+    for j in range(num_points):
+        if adj[i][j] >= cutoff:
+            row.append(i)
+            col.append(j)
+            edge.append(adj[i][j])
+row = np.array(row, dtype= np.uint64)
+col = np.array(col, dtype=np.uint64)
+edge = np.array(edge, dtype=np.double)
+adj = sp.sparse.coo_matrix((edge, (row, col)), shape=(num_points, num_points))
+
+print(f"num_edges: {len(adj.data)}")
 cluster_list = clustering(1234, 10, data, -float("inf"), adj)
 
 draw_size([len(cluster) for cluster in cluster_list])
