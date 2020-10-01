@@ -6,6 +6,7 @@
 #define DDCRP_GIBBS_PRIOR_H
 
 #include "common.h"
+#include "math.h"
 
 class NIW {
     // Nornal Inverse Wishart

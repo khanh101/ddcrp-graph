@@ -72,7 +72,7 @@ num_clusters: int = 0
 num_iterations: int = 10
 for i in range(num_iterations):
     ddcrp.iterate(-float("inf"), logdecay, loglikelihood)
-    table = ddcrp.assignment.table();
+    table = ddcrp.assignment.table()
     ens.add(table)
     max_misclustering_rate: float = ens.misclustering_rate().mean()
     print(f"iter {i} num clusters {len(table)} misclustering_rate {max_misclustering_rate}")

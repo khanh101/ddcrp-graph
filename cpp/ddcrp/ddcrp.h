@@ -16,6 +16,7 @@ using Customer = uint64;
 using Table = uint64;
 
 const Customer customer_nil = -1;
+const Table table_nil = -1;
 
 class Assignment {
 public:
@@ -23,50 +24,48 @@ public:
 
     ~Assignment() = default;
 
-    std::set<Customer> weakly_connected_component(Customer customer);
-
-    void unlink(Customer customer);
+    void unlink(Customer source);
 
     void link(Customer source, Customer target);
 
-public:
+    [[nodiscard]] Customer num_customers() const;
+
+    std::set<Customer> table(Customer customer) const;
+
+private:
     struct Node {
         Customer m_parent;
         std::set<Customer> m_children;
-
         Node();
+        ~Node() = default;
     };
     uint64 m_num_customers;
-    std::vector<Node> graph;
-    //std::map<Table, std::set<Customer>> table2customer;
-    //std::vector<Table> customer2table;
-    Table table_count;
+    std::vector<Node> adjacency_list;
+    std::map<Table, std::set<Customer>> table_list;
+    std::vector<Table> table_assignment;
+    uint64 table_count;
+    std::set<Customer> weakly_connected_component(Customer customer);
+
 };
 
 Assignment::Node::Node() :
-        m_parent(customer_nil), m_children() {}
+        m_parent(customer_nil), m_children()
+{}
 
 Assignment::Assignment(Customer num_customers) :
-//init default, each customer sits in one table
-//:param num_customers: number of customers
-        m_num_customers(num_customers),
-        graph(),
-        //table2customer(),
-        //customer2table(),
-        table_count(num_customers) {
+    //init default, each customer sits in one table
+    //:param num_customers: number of customers
+    m_num_customers(num_customers),
+    adjacency_list(),
+    table_list(),
+    table_assignment(),
+    table_count(num_customers)
+{
     for (Customer customer = 0; customer < num_customers; customer++) {
-        graph.emplace_back();
+        adjacency_list.emplace_back();
+        table_list.emplace(customer, std::set<Customer>({customer}));
+        table_assignment.push_back(customer);
     }
-    /*
-    for (Customer customer = 0; customer < num_customers; customer++) {
-        Table table = customer;
-        table2customer.insert(std::make_pair(table, std::set({customer})));
-    }
-    for (Customer customer = 0; customer < num_customers; customer++) {
-        Table table = customer;
-        customer2table.push_back(table);
-    }
-     */
 }
 
 std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
@@ -82,8 +81,8 @@ std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
         auto current = frontier.back();
         frontier.pop_back();
         visited.insert(current);
-        auto node = graph[current];
-        std::set<Customer> adding = node.m_children;
+        auto node = adjacency_list[current];
+        auto adding = node.m_children;
         adding.insert(node.m_parent);
         for (Customer new_customer: adding) {
             if (new_customer != customer_nil and not is_in_list(frontier, new_customer) and
@@ -95,56 +94,72 @@ std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
     return visited;
 }
 
-void Assignment::unlink(Customer customer) {
-    if (customer == customer_nil) {
+void Assignment::unlink(Customer source) {
+    if (source == customer_nil) {
         return;
     }
+    auto target = adjacency_list[source].m_parent;
     // remove link
-    graph[graph[customer].m_parent].m_children.erase(customer);
-    graph[customer].m_parent = customer_nil;
-    /*
-    // find weakly connected component
-    auto component = weakly_connected_component(customer);
-    // remove component from prev table
-    Table prev_table = customer2table[customer];
-    for (auto c_customer: component) {
-        table2customer[prev_table].erase(c_customer);
+    adjacency_list[target].m_children.erase(source);
+    adjacency_list[source].m_parent = customer_nil;
+    // update table
+    auto new_source_component = weakly_connected_component(source);
+    if (not new_source_component.contains(target)) { // split
+        auto new_target_component = weakly_connected_component(target);
+        // add new two compoents
+        auto new_target_table = table_count;
+        auto new_source_table = table_count + 1;
+        table_count += 2;
+        table_list.insert(std::make_pair(new_source_table, new_source_component));
+        table_list.insert(std::make_pair(new_target_table, new_target_component));
+        // remove old compoenent
+        auto old_join_table = table_assignment[source];
+        table_list.erase(old_join_table);
+        // update assignment
+        for (auto new_source_customer: new_source_component) {
+            table_assignment[new_source_customer] = new_source_table;
+        }
+        for (auto new_target_customer: new_target_component) {
+            table_assignment[new_target_customer] = new_target_table;
+        }
     }
-    if (table2customer[prev_table].empty()) {
-        table2customer.erase(prev_table);
-    }
-    // add component to next table
-    Table next_table = table_count++;
-    table2customer.insert(std::make_pair(next_table, component));
-    // update table label
-    for (auto c_customer: component) {
-        customer2table[c_customer] = next_table;
-    }
-     */
 }
 
 void Assignment::link(Customer source, Customer target) {
-    graph[source].m_parent = target;
-    graph[target].m_children.insert(source);
-    /*
-    auto source_component = weakly_connected_component(source);
-    if (not source_component.contains(target)) {
-        auto target_component = weakly_connected_component(target);
-        // remove two old tables
-        Table source_table = customer2table[source];
-        Table target_table = customer2table[target];
-        table2customer.erase(source_table);
-        table2customer.erase(target_table);
-        Table new_table = table_count++;
-        auto &new_component = source_component;
-        new_component.insert(target_component.begin(), target_component.end());
-        for (auto c_customer: new_component) {
-            customer2table[c_customer] = new_table;
+    // add link
+    adjacency_list[source].m_parent = target;
+    adjacency_list[target].m_children.insert(source);
+    // update table
+    auto old_source_table = table_assignment[source];
+    auto old_source_component = table_list[old_source_table];
+    if (not old_source_component.contains(target)) { // join
+        auto old_target_table = table_assignment[target];
+        auto old_target_component = table_list[old_target_table];
+        // add new join component
+        auto new_join_component = std::set<Customer>();
+        new_join_component.insert(old_source_component.begin(), old_source_component.end());
+        new_join_component.insert(old_target_component.begin(), old_target_component.end());
+        auto new_join_table = table_count;
+        table_count += 1;
+        table_list.insert(std::make_pair(new_join_table, new_join_component));
+        // remove old component
+        table_list.erase(old_source_table);
+        table_list.erase(old_target_table);
+        // update assignment
+        for (auto new_join_customer: new_join_component) {
+            table_assignment[new_join_customer] = new_join_table;
         }
-        table2customer.insert(std::make_pair(new_table, new_component));
     }
-    */
 }
+
+Customer Assignment::num_customers() const {
+    return m_num_customers;
+}
+
+std::set<Customer> Assignment::table(Customer customer) const {
+    return table_list.find(table_assignment[customer])->second;
+}
+
 template <typename UniformRandomNumberGenerator>
 void ddcrp_iterate(
         UniformRandomNumberGenerator& gen,
@@ -153,7 +168,7 @@ void ddcrp_iterate(
         const std::vector<std::map<Customer, float64>> &logdecay_func, // logdecay = logdecay_func[customer1][customer2]
         const std::function<float64(const std::set<Customer> &customer_list)> &loglikelihood_func // loglikelihood of a compoentn
 ) {
-    for (Customer source=0; source < assignment.m_num_customers; source++) {
+    for (Customer source=0; source < assignment.num_customers(); source++) {
         auto& logdecay_map = logdecay_func[source];
         std::vector<Customer> target_list({source});
         for (auto it=logdecay_map.begin(); it != logdecay_map.end(); it++) {
@@ -161,6 +176,7 @@ void ddcrp_iterate(
         }
         std::vector<float64> logweight_list(target_list.size(), 0);
         assignment.unlink(source);
+        auto source_component = assignment.table(source);
         for (uint64 i=0; i<target_list.size(); i++) {
             Customer target = target_list[i];
             if (target == source) {
@@ -168,20 +184,23 @@ void ddcrp_iterate(
                 logweight_list[i] = logalpha;
                 continue;
             }
-            auto source_component = assignment.weakly_connected_component(source);
-            auto logdecay = logdecay_map[target];
+            auto logdecay = logdecay_map.find(target)->second;
             if (source_component.contains(target)) {
                 // no table join
                 logweight_list[i] = logdecay;
                 continue;
             }
             // table join
-            auto target_component = assignment.weakly_connected_component(target);
+            auto target_component = assignment.table(target);
             auto source_loglikehood = loglikelihood_func(source_component);
             auto target_loglikehood = loglikelihood_func(target_component);
-            auto join_loglikehood = loglikelihood_func(source_component + target_component);
-
-        };
+            auto join_component = std::set<Customer>();
+            join_component.insert(source_component.begin(), source_component.end());
+            join_component.insert(target_component.begin(), target_component.end());
+            auto join_loglikehood = loglikelihood_func(join_component);
+            logweight_list[i] = logdecay + join_loglikehood - source_loglikehood - target_loglikehood;
+            // update source component
+        }
         float64 max_logweight = logweight_list[0];
         for (auto logweight: logweight_list) {
             if (logweight > max_logweight) {
