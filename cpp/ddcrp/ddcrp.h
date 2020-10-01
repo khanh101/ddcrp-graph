@@ -170,9 +170,12 @@ void ddcrp_iterate(
 ) {
     for (Customer source=0; source < assignment.num_customers(); source++) {
         auto& logdecay_map = logdecay_func[source];
-        std::vector<Customer> target_list({source});
+        std::vector<Customer> target_list;
         for (auto it=logdecay_map.begin(); it != logdecay_map.end(); it++) {
             target_list.push_back(it->first);
+        }
+        if (not logdecay_map.contains(source)) {
+            target_list.push_back(source);
         }
         std::vector<float64> logweight_list(target_list.size(), 0);
         assignment.unlink(source);
@@ -207,7 +210,7 @@ void ddcrp_iterate(
                 max_logweight = logweight;
             }
         }
-        auto weight_list = std::vector<Customer>(logweight_list.size(), 0);
+        auto weight_list = std::vector<float64>(logweight_list.size(), 0.0);
         for (uint64 i=0; i<logweight_list.size(); i++) {
             weight_list[i] = math::exp(logweight_list[i] - max_logweight);
         }
