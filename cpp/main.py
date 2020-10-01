@@ -1,3 +1,5 @@
+import time
+
 import scipy as sp
 import scipy.sparse
 from cpp.clustering import clustering
@@ -5,6 +7,8 @@ from cpp.clustering import clustering
 import numpy as np
 
 from python.draw import draw_data, draw_size
+seed = 1234
+np.random.seed(seed)
 
 num_clusters = 10 # 3
 prior_scale = 5
@@ -45,7 +49,7 @@ draw_data(data, cluster_list)
 adj = np.empty((num_points, num_points))
 for i in range(num_points):
     for j in range(num_points):
-        adj[i][j] = - 10000 * ((data[i] - data[j])**2).sum()
+        adj[i][j] = - 100000 * ((data[i] - data[j])**2).sum()
 
 edge_list = list(adj.reshape((num_points*num_points)))
 edge_list.sort()
@@ -69,7 +73,10 @@ edge = np.array(edge, dtype=np.double)
 adj = sp.sparse.coo_matrix((edge, (row, col)), shape=(num_points, num_points))
 
 print(f"num_edges: {len(adj.data)}")
-cluster_list = clustering(1234, 10, data, -float("inf"), adj)
+t0 = time.time()
+cluster_list = clustering(seed, 10, data, -float("inf"), adj)
+t1 = time.time()
+print(f"elapsed time: {t1-t0}")
 
 draw_size([len(cluster) for cluster in cluster_list])
 
