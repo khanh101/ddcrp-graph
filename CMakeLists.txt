@@ -14,5 +14,5 @@ add_executable(ddcrp_gibbs_main cpp/main.cpp)
 target_link_libraries(ddcrp_gibbs_main ddcrp_gibbs)
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")

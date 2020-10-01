@@ -43,10 +43,10 @@ private:
     };
 
     uint64 m_num_customers;
-    std::vector<Node> adjacency_list;
-    std::map<Table, std::set<Customer>> table_list;
-    std::vector<Table> table_assignment;
-    uint64 table_count;
+    std::vector<Node> m_adjacency_list;
+    std::map<Table, std::set<Customer>> m_table_list;
+    std::vector<Table> m_table_assignment;
+    uint64 m_table_count;
 
     std::set<Customer> weakly_connected_component(Customer customer);
 
@@ -59,14 +59,14 @@ Assignment::Assignment(Customer num_customers) :
 //init default, each customer sits in one table
 //:param num_customers: number of customers
         m_num_customers(num_customers),
-        adjacency_list(),
-        table_list(),
-        table_assignment(),
-        table_count(num_customers) {
+        m_adjacency_list(),
+        m_table_list(),
+        m_table_assignment(),
+        m_table_count(num_customers) {
     for (Customer customer = 0; customer < num_customers; customer++) {
-        adjacency_list.emplace_back();
-        table_list.emplace(customer, std::set<Customer>({customer}));
-        table_assignment.push_back(customer);
+        m_adjacency_list.emplace_back();
+        m_table_list.emplace(customer, std::set<Customer>({customer}));
+        m_table_assignment.push_back(customer);
     }
 }
 
@@ -83,7 +83,7 @@ std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
         auto current = frontier.back();
         frontier.pop_back();
         visited.insert(current);
-        auto node = adjacency_list[current];
+        auto node = m_adjacency_list[current];
         auto adding = node.m_children;
         adding.insert(node.m_parent);
         for (Customer new_customer: adding) {
@@ -100,56 +100,59 @@ void Assignment::unlink(Customer source) {
     if (source == customer_nil) {
         return;
     }
-    auto target = adjacency_list[source].m_parent;
+    auto target = m_adjacency_list[source].m_parent;
+    if (target == customer_nil) {
+        return;
+    }
     // remove link
-    adjacency_list[target].m_children.erase(source);
-    adjacency_list[source].m_parent = customer_nil;
+    m_adjacency_list[target].m_children.erase(source);
+    m_adjacency_list[source].m_parent = customer_nil;
     // update table
     auto new_source_component = weakly_connected_component(source);
     if (not new_source_component.contains(target)) { // split
         auto new_target_component = weakly_connected_component(target);
         // add new two compoents
-        auto new_target_table = table_count;
-        auto new_source_table = table_count + 1;
-        table_count += 2;
-        table_list.insert(std::make_pair(new_source_table, new_source_component));
-        table_list.insert(std::make_pair(new_target_table, new_target_component));
+        auto new_target_table = m_table_count;
+        auto new_source_table = m_table_count + 1;
+        m_table_count += 2;
+        m_table_list.insert(std::make_pair(new_source_table, new_source_component));
+        m_table_list.insert(std::make_pair(new_target_table, new_target_component));
         // remove old compoenent
-        auto old_join_table = table_assignment[source];
-        table_list.erase(old_join_table);
+        auto old_join_table = m_table_assignment[source];
+        m_table_list.erase(old_join_table);
         // update assignment
         for (auto new_source_customer: new_source_component) {
-            table_assignment[new_source_customer] = new_source_table;
+            m_table_assignment[new_source_customer] = new_source_table;
         }
         for (auto new_target_customer: new_target_component) {
-            table_assignment[new_target_customer] = new_target_table;
+            m_table_assignment[new_target_customer] = new_target_table;
         }
     }
 }
 
 void Assignment::link(Customer source, Customer target) {
     // add link
-    adjacency_list[source].m_parent = target;
-    adjacency_list[target].m_children.insert(source);
+    m_adjacency_list[source].m_parent = target;
+    m_adjacency_list[target].m_children.insert(source);
     // update table
-    auto old_source_table = table_assignment[source];
-    auto old_source_component = table_list[old_source_table];
+    auto old_source_table = m_table_assignment[source];
+    auto old_source_component = m_table_list[old_source_table];
     if (not old_source_component.contains(target)) { // join
-        auto old_target_table = table_assignment[target];
-        auto old_target_component = table_list[old_target_table];
+        auto old_target_table = m_table_assignment[target];
+        auto old_target_component = m_table_list[old_target_table];
         // add new join component
         auto new_join_component = std::set<Customer>();
         new_join_component.insert(old_source_component.begin(), old_source_component.end());
         new_join_component.insert(old_target_component.begin(), old_target_component.end());
-        auto new_join_table = table_count;
-        table_count += 1;
-        table_list.insert(std::make_pair(new_join_table, new_join_component));
+        auto new_join_table = m_table_count;
+        m_table_count += 1;
+        m_table_list.insert(std::make_pair(new_join_table, new_join_component));
         // remove old component
-        table_list.erase(old_source_table);
-        table_list.erase(old_target_table);
+        m_table_list.erase(old_source_table);
+        m_table_list.erase(old_target_table);
         // update assignment
         for (auto new_join_customer: new_join_component) {
-            table_assignment[new_join_customer] = new_join_table;
+            m_table_assignment[new_join_customer] = new_join_table;
         }
     }
 }
@@ -159,7 +162,7 @@ Customer Assignment::num_customers() const {
 }
 
 std::set<Customer> Assignment::table(Customer customer) const {
-    return table_list.find(table_assignment[customer])->second;
+    return m_table_list.find(m_table_assignment[customer])->second;
 }
 
 template<typename UnitRNG>

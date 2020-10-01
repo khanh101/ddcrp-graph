@@ -7,7 +7,7 @@
 #include "ddcrp_c.h"
 
 void test() {
-    uint64 n = 200;
+    uint64 n = 10;
     uint64 d = 2;
 
     Eigen::MatrixXd data = Eigen::MatrixXd::Random(d, n);
