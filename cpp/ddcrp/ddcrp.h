@@ -168,19 +168,21 @@ void ddcrp_iterate(
         const std::vector<std::map<Customer, float64>> &logdecay_func, // logdecay = logdecay_func[customer1][customer2]
         const std::function<float64(const std::set<Customer> &customer_list)> &loglikelihood_func // loglikelihood of a compoentn
 ) {
-    auto target_list = std::vector<Customer>(assignment.num_customers(), 0.0);
-    auto logweight_list = std::vector<float64>(assignment.num_customers(), 0.0);
+    auto target_list = std::vector<Customer>();
+    auto logweight_list = std::vector<float64>();
+    target_list.reserve(assignment.num_customers());
+    logweight_list.reserve(assignment.num_customers());
     for (Customer source=0; source < assignment.num_customers(); source++) {
-        target_list.clear();
         auto& logdecay_map = logdecay_func[source];
-        for (auto it=logdecay_map.begin(); it != logdecay_map.end(); it++) {
+        target_list.clear();
+        for (auto it=logdecay_map.begin(); it != logdecay_map.end(); ++it) {
             target_list.push_back(it->first);
         }
         if (not logdecay_map.contains(source)) {
             target_list.push_back(source);
         }
         logweight_list.clear();
-        logweight_list.resize(assignment.num_customers(), -std::numeric_limits<float64>::infinity());
+        logweight_list.resize(target_list.size(), -std::numeric_limits<float64>::infinity());
         assignment.unlink(source);
         auto source_component = assignment.table(source);
         for (uint64 i=0; i<target_list.size(); i++) {
@@ -213,7 +215,6 @@ void ddcrp_iterate(
                 max_logweight = logweight;
             }
         }
-        //auto weight_list = std::vector<float64>(logweight_list.size(), 0.0);
         auto& weight_list = logweight_list;
         for (uint64 i=0; i<logweight_list.size(); i++) {
             weight_list[i] = math::exp(logweight_list[i] - max_logweight);
