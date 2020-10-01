@@ -222,6 +222,7 @@ void ddcrp_iterate(
             join_component.insert(source_component.begin(), source_component.end());
             join_component.insert(target_component.begin(), target_component.end());
             auto join_loglikehood = loglikelihood_func(join_component);
+            //std::cout << join_loglikehood << " " << source_loglikehood << " " << target_loglikehood << std::endl;
             logweight_list[i] = logdecay + join_loglikehood - source_loglikehood - target_loglikehood;
             // update source component
         }

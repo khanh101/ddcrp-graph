@@ -11,9 +11,9 @@ extern "C" {
             const float64* embedding, // (d x n) col major matrix
             float64 logalpha, // logalpha
             uint64 num_edges, // num edges
-            const uint64* adj_rows, // coo_matrix for logdecay
-            const uint64* adj_cols, //
-            const uint64* adj_logdecay, //
+            const uint64* adj_row, // coo_matrix for logdecay
+            const uint64* adj_col, //
+            const float64* adj_logdecay, //
             uint64* cluster_assignment // output assignment: preallocated
             );
 };
