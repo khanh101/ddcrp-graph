@@ -16,6 +16,10 @@ int main(int argc, char** argv) {
     //
     std::random_device r;
     std::default_random_engine e(r());
+    std::uniform_real_distribution<float64> dist(0, 1);
+    auto gen = [&]() -> float64 {
+        return dist(e);
+    };
     auto logdecay = std::vector<std::map<uint64, float64>>();
 
     for (uint64 i=0; i<n; i++) {
@@ -33,10 +37,11 @@ int main(int argc, char** argv) {
     auto loglikelihood = [&](const std::set<uint64>& point_list) -> float64 {
         return 0;
     };
+
     for (int i=0; i<10; i++) {
         std::cout << i << std::endl;
         ddcrp_iterate(
-            e,
+            gen,
             ddcrp,
             -std::numeric_limits<float64>::infinity(),
             logdecay,

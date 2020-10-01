@@ -26,6 +26,23 @@ namespace math {
         }
         return res;
     }
+
+    template <typename UniformRandomNumberGenerator>
+    uint64 discrete_sampling(UniformRandomNumberGenerator& gen, const std::vector<float64>& weight) {
+        float64 scale = 0.0;
+        for (auto w: weight) {
+            scale += w;
+        }
+        float64 r = gen();
+        r *= scale;
+        for (uint64 i=0; i<weight.size(); i++) {
+            if (r < weight[i]) {
+                return i;
+            }
+            r -= weight[i];
+        }
+        return weight.size();
+    }
 }
 
 #endif //DDCRP_GIBBS_MATH_H
