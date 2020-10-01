@@ -30,37 +30,39 @@ public:
 
     [[nodiscard]] Customer num_customers() const;
 
-    std::set<Customer> table(Customer customer) const;
+    [[nodiscard]] std::set<Customer> table(Customer customer) const;
 
 private:
     struct Node {
         Customer m_parent;
         std::set<Customer> m_children;
+
         Node();
+
         ~Node() = default;
     };
+
     uint64 m_num_customers;
     std::vector<Node> adjacency_list;
     std::map<Table, std::set<Customer>> table_list;
     std::vector<Table> table_assignment;
     uint64 table_count;
+
     std::set<Customer> weakly_connected_component(Customer customer);
 
 };
 
 Assignment::Node::Node() :
-        m_parent(customer_nil), m_children()
-{}
+        m_parent(customer_nil), m_children() {}
 
 Assignment::Assignment(Customer num_customers) :
-    //init default, each customer sits in one table
-    //:param num_customers: number of customers
-    m_num_customers(num_customers),
-    adjacency_list(),
-    table_list(),
-    table_assignment(),
-    table_count(num_customers)
-{
+//init default, each customer sits in one table
+//:param num_customers: number of customers
+        m_num_customers(num_customers),
+        adjacency_list(),
+        table_list(),
+        table_assignment(),
+        table_count(num_customers) {
     for (Customer customer = 0; customer < num_customers; customer++) {
         adjacency_list.emplace_back();
         table_list.emplace(customer, std::set<Customer>({customer}));
@@ -160,22 +162,23 @@ std::set<Customer> Assignment::table(Customer customer) const {
     return table_list.find(table_assignment[customer])->second;
 }
 
-template <typename UniformRandomNumberGenerator>
+template<typename UnitRNG>
 void ddcrp_iterate(
-        UniformRandomNumberGenerator& gen,
+        UnitRNG gen,
         Assignment &assignment,
         float64 logalpha, // log(alpha)
         const std::vector<std::map<Customer, float64>> &logdecay_func, // logdecay = logdecay_func[customer1][customer2]
-        const std::function<float64(const std::set<Customer> &customer_list)> &loglikelihood_func // loglikelihood of a compoentn
+        const std::function<float64(
+                const std::set<Customer> &customer_list)> &loglikelihood_func // loglikelihood of a compoentn
 ) {
     auto target_list = std::vector<Customer>();
     auto logweight_list = std::vector<float64>();
     target_list.reserve(assignment.num_customers());
     logweight_list.reserve(assignment.num_customers());
-    for (Customer source=0; source < assignment.num_customers(); source++) {
-        auto& logdecay_map = logdecay_func[source];
+    for (Customer source = 0; source < assignment.num_customers(); source++) {
+        auto &logdecay_map = logdecay_func[source];
         target_list.clear();
-        for (auto it=logdecay_map.begin(); it != logdecay_map.end(); ++it) {
+        for (auto it = logdecay_map.begin(); it != logdecay_map.end(); ++it) {
             target_list.push_back(it->first);
         }
         if (not logdecay_map.contains(source)) {
@@ -185,7 +188,7 @@ void ddcrp_iterate(
         logweight_list.resize(target_list.size(), -std::numeric_limits<float64>::infinity());
         assignment.unlink(source);
         auto source_component = assignment.table(source);
-        for (uint64 i=0; i<target_list.size(); i++) {
+        for (uint64 i = 0; i < target_list.size(); i++) {
             Customer target = target_list[i];
             if (target == source) {
                 // self loop
@@ -215,8 +218,8 @@ void ddcrp_iterate(
                 max_logweight = logweight;
             }
         }
-        auto& weight_list = logweight_list;
-        for (uint64 i=0; i<logweight_list.size(); i++) {
+        auto &weight_list = logweight_list;
+        for (uint64 i = 0; i < logweight_list.size(); i++) {
             weight_list[i] = math::exp(logweight_list[i] - max_logweight);
         }
 

@@ -5,6 +5,7 @@
 
 #ifndef DDCRP_GIBBS_TYPE_H
 #define DDCRP_GIBBS_TYPE_H
+
 #include <eigen3/Eigen/Dense>
 
 static_assert(sizeof(double) == 8, "double size must be 8 bytes");

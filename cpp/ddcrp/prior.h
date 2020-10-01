@@ -16,6 +16,7 @@ public:
     ~NIW() = default;
 
     [[nodiscard]] float64 marginal_loglikelihood(const matrix &data, const std::vector<uint64> &index_list) const;
+
     friend std::ostream &operator<<(std::ostream &os, const NIW &niw);
 
 private:
@@ -126,14 +127,14 @@ float64 NIW::marginal_loglikelihood(const matrix &data, const std::vector<uint64
 
 
 std::ostream &operator<<(std::ostream &os, const NIW &niw) {
-    os  << "dim: "<< niw.m_dim << "\n"
-        << "k: " << niw.m_k << "\n"
-        << "v: " << niw.m_v << "\n"
-        << "m: " << niw.m_m << "\n"
-        << "S: " << niw.m_S << "\n"
-        << "log(k): " << niw.m_log_k << "\n"
-        << "logdet(S): " << niw.m_logdet_S << "\n"
-        << "loggamma(v): " <<niw.m_loggamma_d_v_2;
+    os << "dim: " << niw.m_dim << "\n"
+       << "k: " << niw.m_k << "\n"
+       << "v: " << niw.m_v << "\n"
+       << "m: " << niw.m_m << "\n"
+       << "S: " << niw.m_S << "\n"
+       << "log(k): " << niw.m_log_k << "\n"
+       << "logdet(S): " << niw.m_logdet_S << "\n"
+       << "loggamma(v): " << niw.m_loggamma_d_v_2;
     return os;
 }
 

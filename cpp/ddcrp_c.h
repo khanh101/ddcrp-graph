@@ -6,4 +6,11 @@
 #include "ddcrp/math.h"
 #include "ddcrp/prior.h"
 
+
+extern "C" {
+
+};
+
+
+
 #endif //DDCRP_GIBBS_DDCRP_C_H
