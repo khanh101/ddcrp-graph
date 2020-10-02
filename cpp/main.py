@@ -9,7 +9,8 @@ import numpy as np
 
 from cpp.walk import Walk
 from cpp.word2vec import Word2Vec
-from python.draw import draw_size
+from python.draw import draw_size, draw_mat
+
 seed = 1234
 np.random.seed(seed)
 
@@ -51,7 +52,6 @@ def comm_to_label(comm: List[Set[int]]) -> np.ndarray:
 
 
 def label_to_comm(label_list: np.ndarray) -> List[Set[int]]:
-    label = np.unique(label_list)
     communities = {}
     for node, label in enumerate(label_list):
         if label not in communities:
@@ -59,13 +59,24 @@ def label_to_comm(label_list: np.ndarray) -> List[Set[int]]:
         communities[label].add(node)
     return list(communities.values())
 
+def similarity_matrix(cluster_label_list: np.ndarray) -> np.ndarray:
+    num_points = cluster_label_list.shape[1]
+    count: np.ndarray = np.zeros((num_points, num_points), dtype=np.int)
+    for label_list in cluster_label_list:
+        comm = label_to_comm(label_list)
+        for c in comm:
+            for i in c:
+                for j in c:
+                    count[i][j] += 1
+    return count
+
 
 dim = 50
 num_clusters = 10 # 3
 prior_scale = 5
 cluster_scale = 1
 gamma = 2.5
-num_points = 100 # 10
+num_points = 1000 # 10
 cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
 cluster_size /= cluster_size.sum()
 cluster_size *= num_points
@@ -110,6 +121,10 @@ t0 = time.time()
 cluster_label_list = clustering(seed, 1+int(500000 / (num_points*num_points)), data, -float("inf"), a)
 t1 = time.time()
 print(f"ddcrp time: {t1-t0}")
+
+draw_mat(similarity_matrix(cluster_label_list))
+
+
 cluster_list = label_to_comm(cluster_label_list[-1])
 print(len(cluster_list))
 print(cluster_list)
