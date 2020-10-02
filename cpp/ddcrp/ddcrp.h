@@ -30,7 +30,9 @@ public:
 
     [[nodiscard]] Customer num_customers() const;
 
-    [[nodiscard]] std::set<Customer> table(Customer customer) const;
+    Table table(Customer customer) const;
+
+    [[nodiscard]] std::set<Customer> component(Customer customer) const;
 
     [[nodiscard]] std::vector<std::set<Customer>> table_list() const;
 
@@ -163,7 +165,11 @@ Customer Assignment::num_customers() const {
     return m_num_customers;
 }
 
-std::set<Customer> Assignment::table(Customer customer) const {
+Table Assignment::table(Customer customer) const {
+    return m_table_assignment[customer];
+}
+
+std::set<Customer> Assignment::component(Customer customer) const {
     return m_table_list.find(m_table_assignment[customer])->second;
 }
 
@@ -200,7 +206,6 @@ void ddcrp_iterate(
         logweight_list.clear();
         logweight_list.resize(target_list.size(), -std::numeric_limits<float64>::infinity());
         assignment.unlink(source);
-        auto source_component = assignment.table(source);
         for (uint64 i = 0; i < target_list.size(); i++) {
             Customer target = target_list[i];
             if (target == source) {
@@ -209,13 +214,14 @@ void ddcrp_iterate(
                 continue;
             }
             auto logdecay = logdecay_map.find(target)->second;
-            if (source_component.contains(target)) {
+            if (assignment.table(source) == assignment.table(target)) {
                 // no table join
                 logweight_list[i] = logdecay;
                 continue;
             }
             // table join
-            auto target_component = assignment.table(target);
+            auto source_component = assignment.component(source);
+            auto target_component = assignment.component(target);
             auto source_loglikehood = loglikelihood_func(source_component);
             auto target_loglikehood = loglikelihood_func(target_component);
             auto join_component = std::set<Customer>();
