@@ -1,37 +1,92 @@
 import time
+from typing import Union, List, Set
 
 import scipy as sp
 import scipy.sparse
-from cpp.clustering import clustering
-
+from cpp.clustering.clustering import clustering
+import networkx as nx
 import numpy as np
 
-from python.draw import draw_data, draw_size
+from cpp.walk import Walk
+from cpp.word2vec import Word2Vec
+from python.draw import draw_size
 seed = 1234
 np.random.seed(seed)
 
+def word2vec(a: sp.sparse.coo_matrix, dim: int, nonbacktracking: bool = False) -> np.ndarray:
+    num_nodes = a.shape[0]
+    walks_per_node = 20
+    walk_length = 10
+    context = 5
+    num_iterations = 10
+    degree_normalization = False
+    w = Walk(a)
+    walks = w.walk(
+        degree_normalization=degree_normalization,
+        nonbacktracking=nonbacktracking,
+        walks_per_node=walks_per_node,
+        walk_length=walk_length,
+    )
+    embedding_list = Word2Vec(
+        num_nodes=num_nodes,
+        walks=walks,
+        dim=dim,
+        context=context,
+        num_iterations=num_iterations,
+    )
+
+    emb = np.zeros(shape=(num_nodes, dim))
+    for node, emb_vec in enumerate(embedding_list):
+        emb[node, :] = emb_vec
+
+    return emb
+
+def comm_to_label(comm: List[Set[int]]) -> np.ndarray:
+    num_nodes = sum([len(c) for c in comm])
+    label_list = np.empty(shape=(num_nodes,), dtype=np.int)
+    for label, c in enumerate(comm):
+        for node in c:
+            label_list[node] = label
+    return label_list
+
+
+def label_to_comm(label_list: Union[List[int], np.ndarray]) -> List[Set[int]]:
+    min_label = min(label_list)
+    max_label = max(label_list)
+    communities = [[] for _ in range(min_label, max_label + 1)]
+    for idx, label in enumerate(label_list):
+        communities[label].append(idx)
+    communities = [set(comm) for comm in communities]
+    return communities
+
+
+dim = 50
 num_clusters = 10 # 3
 prior_scale = 5
 cluster_scale = 1
 gamma = 2.5
-num_points = 1000 # 10
+num_points = 100 # 10
 cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
 cluster_size /= cluster_size.sum()
 cluster_size *= num_points
 cluster_size = 1 + cluster_size.astype(np.int)
 num_points = sum(cluster_size)
-num_edges = 100 * num_points
+
 draw_size(cluster_size)
+p_in = 50 / num_points
+p_out = p_in / 10
+p = (p_in * np.identity(len(cluster_size))) + p_out
 
-data_list = [
-    np.random.multivariate_normal(
-        np.random.multivariate_normal([0, 0], prior_scale * np.identity(2)),
-        cluster_scale * np.identity(2),
-        size=size,
-        )
-    for size in cluster_size
-]
 
+
+g = nx.generators.community.stochastic_block_model(
+    sizes=cluster_size,
+    p=p,
+    seed=seed,
+)
+a = sp.sparse.coo_matrix(nx.adjacency_matrix(g))
+a.data = a.data.astype(np.float64)
+print(f"num edges: {len(a.data)}")
 cluster_list = [set() for _ in range(num_clusters)]
 count = 0
 for cluster, size in enumerate(cluster_size):
@@ -39,47 +94,23 @@ for cluster, size in enumerate(cluster_size):
         cluster_list[cluster].add(count)
         count += 1
 
-data = np.concatenate(data_list, axis=0)
+print(f"max modularity: {nx.algorithms.community.quality.modularity(g, cluster_list)}")
+
+t0 = time.time()
+data = word2vec(a, dim)
 
 data -= data.mean(axis=0)
-data /= data.std(axis=0)
-
-draw_data(data, cluster_list)
-
-adj = np.empty((num_points, num_points))
-for i in range(num_points):
-    for j in range(num_points):
-        adj[i][j] = - 50000 * ((data[i] - data[j])**2).sum()
-
-edge_list = list(adj.reshape((num_points*num_points)))
-edge_list.sort()
-edge_list.reverse()
-max_edge = edge_list[0]
-print(f"max_edge: {max_edge}")
-cutoff = edge_list[num_edges]
-
-row = []
-col = []
-edge = []
-for i in range(num_points):
-    for j in range(num_points):
-        if adj[i][j] >= cutoff:
-            row.append(i)
-            col.append(j)
-            edge.append(adj[i][j])
-row = np.array(row, dtype= np.uint64)
-col = np.array(col, dtype=np.uint64)
-edge = np.array(edge, dtype=np.double)
-adj = sp.sparse.coo_matrix((edge, (row, col)), shape=(num_points, num_points))
-
-print(f"num_edges: {len(adj.data)}")
-t0 = time.time()
-cluster_list = clustering(seed, 10, data, -float("inf"), adj)
+data /= data.std(axis=0).mean()
 t1 = time.time()
-print(f"elapsed time: {t1-t0}")
+print(f"deepwalk time: {t1-t0}")
 
-draw_size([len(cluster) for cluster in cluster_list])
-
-draw_data(data, cluster_list)
-
+for e in range(len(a.data)):
+    a.data[e] = - 100000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
+t0 = time.time()
+cluster_list = clustering(seed, 1+int(500000 / (num_points*num_points)), data, -float("inf"), a)
+t1 = time.time()
+print(f"ddcrp time: {t1-t0}")
+print(len(cluster_list))
+print(cluster_list)
+print(f"run modularity: {nx.algorithms.community.quality.modularity(g, cluster_list)}")
 
