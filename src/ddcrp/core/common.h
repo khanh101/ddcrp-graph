@@ -19,8 +19,6 @@ using int64 = long;
 using vector = Eigen::Matrix<float64, Eigen::Dynamic, 1>;
 using matrix = Eigen::Matrix<float64, Eigen::Dynamic, Eigen::Dynamic>;
 
-const bool debug = true;
-
 matrix load_data(uint64 rows, uint64 cols, const float64* data) {
     auto map = Eigen::Map<const Eigen::Matrix<Eigen::MatrixXd::Scalar, Eigen::MatrixXd::RowsAtCompileTime, Eigen::MatrixXd::ColsAtCompileTime, Eigen::ColMajor>>(data, rows, cols);
     return matrix(map);

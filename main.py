@@ -3,13 +3,13 @@ from typing import List, Set
 
 import scipy as sp
 import scipy.sparse
-from cpp.clustering.ddcrp.clustering import clustering
+from src.ddcrp.clustering import clustering
 import networkx as nx
 import numpy as np
 
-from cpp.walk import Walk
-from cpp.word2vec import Word2Vec
-from python.draw import draw_size, draw_mat
+from src.deepwalk.walk import Walk
+from src.deepwalk.word2vec import Word2Vec
+from draw import draw_size, draw_mat
 
 seed = 1234
 np.random.seed(seed)
