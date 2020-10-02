@@ -76,7 +76,7 @@ num_clusters = 10 # 3
 prior_scale = 5
 cluster_scale = 1
 gamma = 2.5
-num_points = 1000 # 10
+num_points = 300 # 10
 cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
 cluster_size /= cluster_size.sum()
 cluster_size *= num_points
@@ -96,7 +96,7 @@ g = nx.generators.community.stochastic_block_model(
     seed=seed,
 )
 a = nx.adjacency_matrix(g)
-a = a.dot(a)
+#a = a.dot(a)
 a = sp.sparse.coo_matrix(a)
 a.data = a.data.astype(np.float64)
 print(f"num edges: {len(a.data)}")

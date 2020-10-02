@@ -1,7 +1,7 @@
 #ifndef DDCRP_GIBBS_CLUSTERING_C_H
 #define DDCRP_GIBBS_CLUSTERING_C_H
 
-#include "ddcrp/common.h"
+#include "core/common.h"
 
 extern "C" {
     void clustering_c(

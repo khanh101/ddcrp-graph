@@ -1,8 +1,8 @@
 #include <map>
 #include <iostream>
 #include "clustering_c.h"
-#include "ddcrp/prior.h"
-#include "ddcrp/ddcrp.h"
+#include "core/prior.h"
+#include "core/ddcrp.h"
 
 void clustering_c(uint64 seed, uint64 num_iterations, uint64 num_nodes, uint64 dimension, const float64 *embedding,
                   float64 logalpha, uint64 num_edges, const uint64 *adj_row, const uint64 *adj_col, const float64 *adj_logdecay,
