@@ -36,7 +36,7 @@ void clustering_c(uint64 seed, uint64 num_iterations, uint64 num_nodes, uint64 d
                 loglikelihood
         );
         result.push_back(ddcrp.table_assignment());
-        std::cout << "iter: " << iter << std:: endl;
+        std::cout << "iter: " << iter << "/" << num_iterations << std:: endl;
     }
     // process result
     auto out = result.back();
