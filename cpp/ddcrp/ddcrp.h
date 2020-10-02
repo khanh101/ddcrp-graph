@@ -98,9 +98,6 @@ std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
 }
 
 void Assignment::unlink(Customer source) {
-    if (source == customer_nil) {
-        return;
-    }
     auto target = m_adjacency_list[source].m_parent;
     if (target == customer_nil) {
         return;
@@ -121,12 +118,14 @@ void Assignment::link(Customer source, Customer target) {
     // add link
     m_adjacency_list[source].m_parent = target;
     m_adjacency_list[target].m_children.insert(source);
-    // update assingment
-    auto new_join_table = m_table_count;
-    m_table_count += 1;
-    auto new_join_component = weakly_connected_component(source);
-    for (auto new_join_customer: new_join_component) {
-        m_table_assignment[new_join_customer] = new_join_table;
+    if (m_table_assignment[source] != m_table_assignment[target]) {
+        // update assingment
+        auto new_join_table = m_table_count;
+        m_table_count += 1;
+        auto new_join_component = weakly_connected_component(source);
+        for (auto new_join_customer: new_join_component) {
+            m_table_assignment[new_join_customer] = new_join_table;
+        }
     }
 }
 
@@ -151,7 +150,7 @@ std::vector<Customer> Assignment::component(Customer customer) const {
 }
 
 std::vector<Table> Assignment::table_assignment() const {
-    return m_table_assignment;
+    return std::vector<Table>(m_table_assignment);
 }
 
 template<typename UnitRNG>
