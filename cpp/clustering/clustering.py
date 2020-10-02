@@ -31,7 +31,7 @@ def clustering(
         embedding: np.ndarray,
         logalpha: float,
         adj: sp.sparse.coo_matrix
-) -> List[Set[int]]:
+) -> np.ndarray:
     if lib is None:
         loadLibrary()
     """
@@ -40,7 +40,7 @@ def clustering(
     :param embedding: embedding matrix (n x d)
     :param logalpha: log(alpha)
     :param adj: adjacency matrix
-    :return: List[Set[int]] clustering
+    :return: clustering
     """
     embedding = embedding.astype(np.float64)
     if not embedding.flags.c_contiguous:
@@ -54,7 +54,7 @@ def clustering(
     adj_logdecay: np.ndarray = adj.data.astype(np.float64)
     if not adj.data.flags.c_contiguous:
         adj_logdecay = np.ascontiguousarray(adj_logdecay)
-    cluster_assignment: np.ndarray = np.ascontiguousarray(np.zeros(embedding.shape[0]))
+    cluster_assignment: np.ndarray = np.ascontiguousarray(np.zeros((num_iterations, embedding.shape[0]), dtype=np.uint64))
     # prepare
     seed: ctypes.c_uint64 = ctypes.c_uint64(seed)
     num_iterations: ctypes.c_uint64 = ctypes.c_uint64(num_iterations)
@@ -71,13 +71,4 @@ def clustering(
     # call
     lib.clustering_c(seed, num_iterations, num_nodes, dimension, embedding_ptr, logalpha, num_edges, adj_row_ptr, adj_col_ptr, adj_logdecay_ptr, cluster_assignment_ptr)
 
-    # get reuslt
-    out: List[Set[int]] = []
-    for label in np.unique(cluster_assignment):
-        s = set()
-        for i in range(len(cluster_assignment)):
-            if cluster_assignment[i] == label:
-                s.add(i)
-        out.append(s)
-
-    return out
+    return cluster_assignment

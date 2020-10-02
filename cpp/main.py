@@ -50,14 +50,14 @@ def comm_to_label(comm: List[Set[int]]) -> np.ndarray:
     return label_list
 
 
-def label_to_comm(label_list: Union[List[int], np.ndarray]) -> List[Set[int]]:
-    min_label = min(label_list)
-    max_label = max(label_list)
-    communities = [[] for _ in range(min_label, max_label + 1)]
-    for idx, label in enumerate(label_list):
-        communities[label].append(idx)
-    communities = [set(comm) for comm in communities]
-    return communities
+def label_to_comm(label_list: np.ndarray) -> List[Set[int]]:
+    label = np.unique(label_list)
+    communities = {}
+    for node, label in enumerate(label_list):
+        if label not in communities:
+            communities[label] = set()
+        communities[label].add(node)
+    return list(communities.values())
 
 
 dim = 50
@@ -107,9 +107,10 @@ print(f"deepwalk time: {t1-t0}")
 for e in range(len(a.data)):
     a.data[e] = - 100000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
 t0 = time.time()
-cluster_list = clustering(seed, 1+int(500000 / (num_points*num_points)), data, -float("inf"), a)
+cluster_label_list = clustering(seed, 1+int(500000 / (num_points*num_points)), data, -float("inf"), a)
 t1 = time.time()
 print(f"ddcrp time: {t1-t0}")
+cluster_list = label_to_comm(cluster_label_list[-1])
 print(len(cluster_list))
 print(cluster_list)
 print(f"run modularity: {nx.algorithms.community.quality.modularity(g, cluster_list)}")

@@ -196,6 +196,7 @@ void ddcrp_iterate(
             auto source_loglikehood = loglikelihood_func(source_component);
             auto target_loglikehood = loglikelihood_func(target_component);
             auto join_component = std::vector<Customer>();
+            join_component.reserve(source_component.size() + target_component.size());
             join_component.insert(join_component.end(), source_component.begin(), source_component.end());
             join_component.insert(join_component.end(), target_component.begin(), target_component.end());
             auto join_loglikehood = loglikelihood_func(join_component);

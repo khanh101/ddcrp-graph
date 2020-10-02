@@ -26,7 +26,7 @@ void clustering_c(uint64 seed, uint64 num_iterations, uint64 num_nodes, uint64 d
         return niw.marginal_loglikelihood(data, customer_list);
     };
 
-    auto result = std::vector<std::vector<uint64>>();
+    auto result = std::vector<uint64>();
     for (auto iter = 0; iter < num_iterations; iter++) {
         ddcrp_iterate(
                 math::UnitRNG(seed),
@@ -35,11 +35,10 @@ void clustering_c(uint64 seed, uint64 num_iterations, uint64 num_nodes, uint64 d
                 logdecay,
                 loglikelihood
         );
-        result.push_back(ddcrp.table_assignment());
+        auto table = ddcrp.table_assignment();
+        result.insert(result.end(), table.begin(), table.end());
         std::cout << "iter: " << iter << "/" << num_iterations << std:: endl;
     }
-    // process result
-    auto out = result.back();
-    //
-    std::memcpy(cluster_assignment, out.data(), num_nodes * sizeof(uint64));
+    // result
+    std::memcpy(cluster_assignment, result.data(), result.size() * sizeof(uint64));
 }
