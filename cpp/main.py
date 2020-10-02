@@ -118,15 +118,17 @@ print(f"deepwalk time: {t1-t0}")
 for e in range(len(a.data)):
     a.data[e] = - 100000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
 t0 = time.time()
-cluster_label_list = clustering(seed, 1+int(500000 / (num_points*num_points)), data, -float("inf"), a)
+cluster_label_list = clustering(seed, 1+int(5000000 / (num_points*num_points)), data, -float("inf"), a)
 t1 = time.time()
 print(f"ddcrp time: {t1-t0}")
 
-draw_mat(similarity_matrix(cluster_label_list))
+sim = similarity_matrix(cluster_label_list)
+draw_mat(sim)
 
 
 cluster_list = label_to_comm(cluster_label_list[-1])
 print(len(cluster_list))
 print(cluster_list)
+draw_size(sorted([len(cluster) for cluster in cluster_list]))
 print(f"run modularity: {nx.algorithms.community.quality.modularity(g, cluster_list)}")
 
