@@ -30,11 +30,11 @@ public:
 
     [[nodiscard]] Customer num_customers() const;
 
-    Table table(Customer customer) const;
+    [[nodiscard]] Table table(Customer customer) const;
 
-    [[nodiscard]] std::set<Customer> component(Customer customer) const;
+    [[nodiscard]] std::vector<Customer> component(Customer customer) const;
 
-    [[nodiscard]] std::vector<std::set<Customer>> table_list() const;
+    [[nodiscard]] std::vector<Table> table_assignment() const;
 
 private:
     struct Node {
@@ -48,7 +48,6 @@ private:
 
     uint64 m_num_customers;
     std::vector<Node> m_adjacency_list;
-    std::map<Table, std::set<Customer>> m_table_list;
     std::vector<Table> m_table_assignment;
     uint64 m_table_count;
 
@@ -64,12 +63,10 @@ Assignment::Assignment(Customer num_customers) :
 //:param num_customers: number of customers
         m_num_customers(num_customers),
         m_adjacency_list(),
-        m_table_list(),
         m_table_assignment(),
         m_table_count(num_customers) {
     for (Customer customer = 0; customer < num_customers; customer++) {
         m_adjacency_list.emplace_back();
-        m_table_list.emplace(customer, std::set<Customer>({customer}));
         m_table_assignment.push_back(customer);
     }
 }
@@ -111,26 +108,12 @@ void Assignment::unlink(Customer source) {
     // remove link
     m_adjacency_list[target].m_children.erase(source);
     m_adjacency_list[source].m_parent = customer_nil;
-    // update table
+    // update assingment
     auto new_source_component = weakly_connected_component(source);
-    if (not new_source_component.contains(target)) { // split
-        auto new_target_component = weakly_connected_component(target);
-        // add new two compoents
-        auto new_target_table = m_table_count;
-        auto new_source_table = m_table_count + 1;
-        m_table_count += 2;
-        m_table_list.insert(std::make_pair(new_source_table, new_source_component));
-        m_table_list.insert(std::make_pair(new_target_table, new_target_component));
-        // remove old compoenent
-        auto old_join_table = m_table_assignment[source];
-        m_table_list.erase(old_join_table);
-        // update assignment
-        for (auto new_source_customer: new_source_component) {
-            m_table_assignment[new_source_customer] = new_source_table;
-        }
-        for (auto new_target_customer: new_target_component) {
-            m_table_assignment[new_target_customer] = new_target_table;
-        }
+    auto new_source_table = m_table_count;
+    m_table_count++;
+    for (auto new_source_customer: new_source_component) {
+        m_table_assignment[new_source_customer] = new_source_table;
     }
 }
 
@@ -138,26 +121,12 @@ void Assignment::link(Customer source, Customer target) {
     // add link
     m_adjacency_list[source].m_parent = target;
     m_adjacency_list[target].m_children.insert(source);
-    // update table
-    auto old_source_table = m_table_assignment[source];
-    auto old_source_component = m_table_list[old_source_table];
-    if (not old_source_component.contains(target)) { // join
-        auto old_target_table = m_table_assignment[target];
-        auto old_target_component = m_table_list[old_target_table];
-        // add new join component
-        auto new_join_component = std::set<Customer>();
-        new_join_component.insert(old_source_component.begin(), old_source_component.end());
-        new_join_component.insert(old_target_component.begin(), old_target_component.end());
-        auto new_join_table = m_table_count;
-        m_table_count += 1;
-        m_table_list.insert(std::make_pair(new_join_table, new_join_component));
-        // remove old component
-        m_table_list.erase(old_source_table);
-        m_table_list.erase(old_target_table);
-        // update assignment
-        for (auto new_join_customer: new_join_component) {
-            m_table_assignment[new_join_customer] = new_join_table;
-        }
+    // update assingment
+    auto new_join_table = m_table_count;
+    m_table_count += 1;
+    auto new_join_component = weakly_connected_component(source);
+    for (auto new_join_customer: new_join_component) {
+        m_table_assignment[new_join_customer] = new_join_table;
     }
 }
 
@@ -169,17 +138,20 @@ Table Assignment::table(Customer customer) const {
     return m_table_assignment[customer];
 }
 
-std::set<Customer> Assignment::component(Customer customer) const {
-    return m_table_list.find(m_table_assignment[customer])->second;
+std::vector<Customer> Assignment::component(Customer customer) const {
+    auto table = m_table_assignment[customer];
+    auto component = std::vector<Customer>();
+    component.reserve(m_num_customers);
+    for (Customer c_customer=0; c_customer < m_num_customers; c_customer++) {
+        if (m_table_assignment[c_customer] == table) {
+            component.push_back(c_customer);
+        }
+    }
+    return component;
 }
 
-std::vector<std::set<Customer>> Assignment::table_list() const {
-    auto out = std::vector<std::set<Customer>>();
-    out.reserve(m_table_list.size());
-    for (const auto& it: m_table_list) {
-        out.push_back(it.second);
-    }
-    return out;
+std::vector<Table> Assignment::table_assignment() const {
+    return m_table_assignment;
 }
 
 template<typename UnitRNG>
@@ -188,7 +160,7 @@ void ddcrp_iterate(
         Assignment &assignment,
         float64 logalpha, // log(alpha)
         const std::function<std::map<Customer, float64>(Customer customer)>& logdecay_func, // logdecay = logdecay_func[customer1][customer2]
-        const std::function<float64(const std::set<Customer> &customer_list)>& loglikelihood_func // loglikelihood of a compoentn
+        const std::function<float64(const std::vector<Customer> &customer_list)>& loglikelihood_func // loglikelihood of a compoentn
 ) {
     auto target_list = std::vector<Customer>();
     auto logweight_list = std::vector<float64>();
@@ -224,9 +196,9 @@ void ddcrp_iterate(
             auto target_component = assignment.component(target);
             auto source_loglikehood = loglikelihood_func(source_component);
             auto target_loglikehood = loglikelihood_func(target_component);
-            auto join_component = std::set<Customer>();
-            join_component.insert(source_component.begin(), source_component.end());
-            join_component.insert(target_component.begin(), target_component.end());
+            auto join_component = std::vector<Customer>();
+            join_component.insert(join_component.end(), source_component.begin(), source_component.end());
+            join_component.insert(join_component.end(), target_component.begin(), target_component.end());
             auto join_loglikehood = loglikelihood_func(join_component);
             //std::cout << join_loglikehood << " " << source_loglikehood << " " << target_loglikehood << std::endl;
             logweight_list[i] = logdecay + join_loglikehood - source_loglikehood - target_loglikehood;

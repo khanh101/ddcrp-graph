@@ -49,7 +49,7 @@ draw_data(data, cluster_list)
 adj = np.empty((num_points, num_points))
 for i in range(num_points):
     for j in range(num_points):
-        adj[i][j] = - 100000 * ((data[i] - data[j])**2).sum()
+        adj[i][j] = - 50000 * ((data[i] - data[j])**2).sum()
 
 edge_list = list(adj.reshape((num_points*num_points)))
 edge_list.sort()
