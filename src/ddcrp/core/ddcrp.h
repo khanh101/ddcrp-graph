@@ -54,6 +54,15 @@ private:
     std::set<Customer> weakly_connected_component(Customer customer);
 
 };
+template<typename UnitRNG>
+void ddcrp_iterate(
+        UnitRNG gen,
+        Assignment &assignment,
+        float64 logalpha, // log(alpha)
+        const std::function<std::map<Customer, float64>(
+                Customer)> &logdecay_func, // logdecay = logdecay_func[customer1][customer2]
+        const std::function<float64(const std::vector<Customer> &)> &loglikelihood_func // loglikelihood of a compoentn
+);
 
 Assignment::Node::Node() :
         m_parent(customer_nil), m_children() {}
@@ -76,9 +85,12 @@ std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
     std::vector<Customer> frontier({customer});
 
     auto is_in_list = [](const std::vector<Customer> &list, Customer customer) -> bool {
-        return std::ranges::any_of(list.begin(), list.end(), [=](Customer item) -> bool {
-            return item == customer;
-        });
+        for (Customer item: list) {
+            if (item == customer) {
+                return true;
+            }
+        }
+        return false;
     };
     while (not frontier.empty()) {
         auto current = frontier.back();
@@ -153,14 +165,11 @@ std::vector<Table> Assignment::table_assignment() const {
     return std::vector<Table>(m_table_assignment);
 }
 
+
 template<typename UnitRNG>
-void ddcrp_iterate(
-        UnitRNG gen,
-        Assignment &assignment,
-        float64 logalpha, // log(alpha)
-        const std::function<std::map<Customer, float64>(Customer customer)>& logdecay_func, // logdecay = logdecay_func[customer1][customer2]
-        const std::function<float64(const std::vector<Customer> &customer_list)>& loglikelihood_func // loglikelihood of a compoentn
-) {
+void ddcrp_iterate(UnitRNG gen, Assignment &assignment, float64 logalpha,
+                   const std::function<std::map<Customer, float64>(Customer)> &logdecay_func,
+                   const std::function<float64(const std::vector<Customer> &)> &loglikelihood_func) {
     auto target_list = std::vector<Customer>();
     auto logweight_list = std::vector<float64>();
     target_list.reserve(assignment.num_customers());
