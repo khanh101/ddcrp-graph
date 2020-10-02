@@ -1,9 +1,9 @@
 import time
-from typing import Union, List, Set
+from typing import List, Set
 
 import scipy as sp
 import scipy.sparse
-from cpp.clustering.clustering import clustering
+from cpp.clustering.ddcrp.clustering import clustering
 import networkx as nx
 import numpy as np
 
