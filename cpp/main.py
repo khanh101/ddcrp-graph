@@ -95,7 +95,9 @@ g = nx.generators.community.stochastic_block_model(
     p=p,
     seed=seed,
 )
-a = sp.sparse.coo_matrix(nx.adjacency_matrix(g))
+a = nx.adjacency_matrix(g)
+a = a.dot(a)
+a = sp.sparse.coo_matrix(a)
 a.data = a.data.astype(np.float64)
 print(f"num edges: {len(a.data)}")
 cluster_list = [set() for _ in range(num_clusters)]
