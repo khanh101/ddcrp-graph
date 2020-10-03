@@ -7,7 +7,7 @@ import scipy as sp
 import scipy.sparse
 
 lib: ctypes.CDLL = None
-def loadLibrary(path: str = "./cmake-build-release/libddcrp_gibbs.so"):
+def loadLibrary(path: str = "./cmake-build-release/libddcrp.so"):
     global lib
     lib = ctypes.cdll.LoadLibrary(path)
 

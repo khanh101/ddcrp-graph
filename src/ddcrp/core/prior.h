@@ -2,8 +2,8 @@
 // Created by khanh on 30/9/20.
 //
 
-#ifndef DDCRP_GIBBS_PRIOR_H
-#define DDCRP_GIBBS_PRIOR_H
+#ifndef DDCRP_PRIOR_H
+#define DDCRP_PRIOR_H
 
 #include "common.h"
 #include "math.h"
@@ -123,4 +123,4 @@ float64 NIW::marginal_loglikelihood(const matrix &data, const std::vector<uint64
     return llh;
 }
 
-#endif //DDCRP_GIBBS_PRIOR_H
+#endif //DDCRP_PRIOR_H

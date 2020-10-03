@@ -3,8 +3,8 @@
 // Common type
 //
 
-#ifndef DDCRP_GIBBS_TYPE_H
-#define DDCRP_GIBBS_TYPE_H
+#ifndef DDCRP_COMMON_H
+#define DDCRP_COMMON_H
 
 #include <eigen3/Eigen/Dense>
 
@@ -24,4 +24,4 @@ matrix load_data(uint64 rows, uint64 cols, const float64* data) {
     return matrix(map);
 }
 
-#endif //DDCRP_GIBBS_TYPE_H
+#endif //DDCRP_COMMON_H

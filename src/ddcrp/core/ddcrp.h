@@ -2,8 +2,8 @@
 // Created by khanh on 1/10/20.
 //
 
-#ifndef DDCRP_GIBBS_DDCRP_H
-#define DDCRP_GIBBS_DDCRP_H
+#ifndef DDCRP_DDCRP_H
+#define DDCRP_DDCRP_H
 
 #include <map>
 #include <vector>
@@ -230,4 +230,4 @@ void ddcrp_iterate(UnitRNG gen, Assignment &assignment, float64 logalpha,
 }
 
 
-#endif //DDCRP_GIBBS_DDCRP_H
+#endif //DDCRP_DDCRP_H

@@ -1,5 +1,5 @@
-#ifndef DDCRP_GIBBS_CLUSTERING_C_H
-#define DDCRP_GIBBS_CLUSTERING_C_H
+#ifndef DDCRP_CLUSTERING_C_H
+#define DDCRP_CLUSTERING_C_H
 
 #include "core/common.h"
 
@@ -20,4 +20,4 @@ extern "C" {
 
 
 
-#endif //DDCRP_GIBBS_CLUSTERING_C_H
+#endif //DDCRP_CLUSTERING_C_H

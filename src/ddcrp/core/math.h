@@ -1,8 +1,8 @@
 //
 // Created by khanh on 30/9/20.
 //
-#ifndef DDCRP_GIBBS_MATH_H
-#define DDCRP_GIBBS_MATH_H
+#ifndef DDCRP_MATH_H
+#define DDCRP_MATH_H
 
 #include<numbers>
 #include <cmath>
@@ -63,4 +63,4 @@ namespace math {
 
 }
 
-#endif //DDCRP_GIBBS_MATH_H
+#endif //DDCRP_MATH_H
