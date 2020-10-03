@@ -1,5 +1,4 @@
 import time
-from typing import List, Set
 
 import scipy as sp
 import scipy.sparse
@@ -10,11 +9,13 @@ import numpy as np
 from src.deepwalk.walk import Walk
 from src.deepwalk.word2vec import Word2Vec
 from draw import draw_size, draw_mat
+from src.mcla.mcla import mcla
+from src.util import label_to_comm
 
 seed = 1234
 np.random.seed(seed)
 
-def word2vec(a: sp.sparse.coo_matrix, dim: int, nonbacktracking: bool = False) -> np.ndarray:
+def deepwalk(a: sp.sparse.coo_matrix, dim: int, nonbacktracking: bool = False) -> np.ndarray:
     num_nodes = a.shape[0]
     walks_per_node = 20
     walk_length = 10
@@ -42,22 +43,6 @@ def word2vec(a: sp.sparse.coo_matrix, dim: int, nonbacktracking: bool = False) -
 
     return emb
 
-def comm_to_label(comm: List[Set[int]]) -> np.ndarray:
-    num_nodes = sum([len(c) for c in comm])
-    label_list = np.empty(shape=(num_nodes,), dtype=np.int)
-    for label, c in enumerate(comm):
-        for node in c:
-            label_list[node] = label
-    return label_list
-
-
-def label_to_comm(label_list: np.ndarray) -> List[Set[int]]:
-    communities = {}
-    for node, label in enumerate(label_list):
-        if label not in communities:
-            communities[label] = set()
-        communities[label].add(node)
-    return list(communities.values())
 
 def similarity_matrix(cluster_label_list: np.ndarray) -> np.ndarray:
     num_points = cluster_label_list.shape[1]
@@ -110,7 +95,7 @@ for cluster, size in enumerate(cluster_size):
 print(f"max modularity: {nx.algorithms.community.quality.modularity(g, cluster_list)}")
 
 t0 = time.time()
-data = word2vec(a, dim)
+data = deepwalk(a, dim)
 
 data -= data.mean(axis=0)
 data /= data.std(axis=0).mean()
@@ -127,8 +112,15 @@ print(f"ddcrp time: {t1-t0}")
 sim = similarity_matrix(cluster_label_list)
 draw_mat(sim)
 
+num_clusters = None
+comm = []
+for cluster_label in cluster_label_list:
+    c = label_to_comm(cluster_label)
+    num_clusters = len(c)
+    comm.extend(c)
 
-cluster_list = label_to_comm(cluster_label_list[-1])
+cluster_list = mcla(comm, num_clusters)
+
 print(len(cluster_list))
 print(cluster_list)
 draw_size(sorted([len(cluster) for cluster in cluster_list]))
