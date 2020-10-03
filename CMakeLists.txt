@@ -6,17 +6,10 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(Eigen3 REQUIRED)
 
 add_library(ddcrp_gibbs SHARED
-        src/ddcrp/clustering_c.h
         src/ddcrp/clustering_c.cpp
-        src/ddcrp/core/common.h
-        src/ddcrp/core/common.cpp
+        src/ddcrp/clustering_c.h
         src/ddcrp/core/math.h
-        src/ddcrp/core/math.cpp
-        src/ddcrp/core/ddcrp.h
-        src/ddcrp/core/prior.h
-        src/ddcrp/core/niw.h
-        src/ddcrp/core/niw.cpp
-        )
+        src/ddcrp/core/common.h src/ddcrp/core/prior.h src/ddcrp/core/ddcrp.h)
 
 add_executable(main main.cpp)
 

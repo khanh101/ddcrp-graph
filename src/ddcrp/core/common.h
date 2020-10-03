@@ -3,8 +3,8 @@
 // Common type
 //
 
-#ifndef DDCRP_GIBBS_COMMON_H
-#define DDCRP_GIBBS_COMMON_H
+#ifndef DDCRP_GIBBS_TYPE_H
+#define DDCRP_GIBBS_TYPE_H
 
 #include <eigen3/Eigen/Dense>
 
@@ -19,6 +19,9 @@ using int64 = long;
 using vector = Eigen::Matrix<float64, Eigen::Dynamic, 1>;
 using matrix = Eigen::Matrix<float64, Eigen::Dynamic, Eigen::Dynamic>;
 
-matrix load_data(uint64 rows, uint64 cols, const float64* data);
+matrix load_data(uint64 rows, uint64 cols, const float64* data) {
+    auto map = Eigen::Map<const Eigen::Matrix<Eigen::MatrixXd::Scalar, Eigen::MatrixXd::RowsAtCompileTime, Eigen::MatrixXd::ColsAtCompileTime, Eigen::ColMajor>>(data, rows, cols);
+    return matrix(map);
+}
 
-#endif //DDCRP_GIBBS_COMMON_H
+#endif //DDCRP_GIBBS_TYPE_H
