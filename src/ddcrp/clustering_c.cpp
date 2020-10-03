@@ -1,7 +1,7 @@
 #include <map>
 #include <iostream>
 #include "clustering_c.h"
-#include "core/prior.h"
+#include "core/niw.h"
 #include "core/ddcrp.h"
 
 void clustering_c(uint64 seed, uint64 num_iterations, uint64 num_nodes, uint64 dimension, const float64 *embedding,
