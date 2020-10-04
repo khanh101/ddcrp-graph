@@ -10,12 +10,12 @@ def draw_mat(a: np.ndarray):
     plt.show()
 
 
-def draw_size(size_list: List[int]):
-    hist, edges = np.histogram(np.array(size_list), bins=10)
+def draw_size(size_list: List[int], bins: int = 10):
+    hist, edges = np.histogram(np.array(size_list), bins=bins)
     centers = []
     for i in range(len(hist)):
         centers.append((edges[i] + edges[i+1])/2)
-    plt.scatter(centers, hist)
+    plt.plot(centers, hist)
     plt.show()
 
 

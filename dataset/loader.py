@@ -1,10 +1,27 @@
 import io
 from typing import Iterator
 
-from dataset import Graph, Node, Edge
+class Node(object):
+    def __init__(self, index: int, name: str):
+        self.index: int = index
+        self.name: str = name
+
+    def __str__(self) -> str:
+        return f"{{{self.index}: {self.name}}}"
 
 
-class Loader(Graph):
+class Edge(object):
+    def __init__(self, index: int, source: int, target: int, timestamp: int, weight: float):
+        self.index: int = index
+        self.source: int = source
+        self.target: int = target
+        self.timestamp: int = timestamp
+        self.weight: float = weight
+
+    def __str__(self) -> str:
+        return f"{{{self.index}: {self.source}->{self.target}: {self.weight}}}"
+
+class Loader(object):
     def __init__(self, dataset_name: str = "email"):
         super(Loader, self).__init__()
         """
@@ -62,9 +79,9 @@ class Loader(Graph):
                 continue
             if line[len(line) - 1] == "\n":
                 line = line[:len(line) - 1]
-            source, destination, timestamp, weight = line.split(",")
+            source, target, timestamp, weight = line.split(",")
             source = int(source)
-            destination = int(destination)
+            target = int(target)
             timestamp = int(timestamp)
             weight = float(weight)
-            yield Edge(index=i - 1, source=source, destination=destination, timestamp=timestamp, weight=weight)
+            yield Edge(index=i - 1, source=source, target=target, timestamp=timestamp, weight=weight)
