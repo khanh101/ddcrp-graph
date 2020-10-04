@@ -61,7 +61,7 @@ num_clusters = 10 # 3
 prior_scale = 5
 cluster_scale = 1
 gamma = 2.5
-num_points = 300 # 10
+num_points = 1000 # 10
 cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
 cluster_size /= cluster_size.sum()
 cluster_size *= num_points
@@ -105,7 +105,7 @@ print(f"deepwalk time: {t1-t0}")
 for e in range(len(a.data)):
     a.data[e] = - 100000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
 t0 = time.time()
-cluster_label_list = clustering(seed, 1+int(5000000 / (num_points*num_points)), data, -float("inf"), a)
+cluster_label_list = clustering(seed, 1+int(17000 / num_points), data, -float("inf"), a)
 t1 = time.time()
 print(f"ddcrp time: {t1-t0}")
 

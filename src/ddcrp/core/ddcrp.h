@@ -190,6 +190,7 @@ void ddcrp_iterate(
         logweight_list.clear();
         logweight_list.resize(target_list.size(), -std::numeric_limits<float64>::infinity());
         assignment.unlink(source);
+        #pragma omp parallel for
         for (uint64 i = 0; i < target_list.size(); i++) {
             Customer target = target_list[i];
             if (target == source) {
