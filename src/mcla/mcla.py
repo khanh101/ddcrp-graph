@@ -8,6 +8,7 @@ from src.util import label_to_comm
 
 def mcla(comm: List[Set[int]], num_clusters: int) -> List[Set[int]]:
     num_metanodes = len(comm)
+    print(f"num metanodes: {num_metanodes}")
     a = np.zeros((num_metanodes, num_metanodes), dtype=np.float64)
     for i in range(num_metanodes):
         for j in range(i+1, num_metanodes):
