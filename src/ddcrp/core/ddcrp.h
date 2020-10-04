@@ -54,9 +54,9 @@ private:
     std::set<Customer> weakly_connected_component(Customer customer);
 
 };
-template<typename UnitRNG>
+//template<typename UnitRNG>
 void ddcrp_iterate(
-        UnitRNG gen,
+        std::function<float64()> gen,
         Assignment &assignment,
         float64 logalpha, // log(alpha)
         const std::function<std::map<Customer, float64>(
@@ -166,10 +166,14 @@ std::vector<Table> Assignment::table_assignment() const {
 }
 
 
-template<typename UnitRNG>
-void ddcrp_iterate(UnitRNG gen, Assignment &assignment, float64 logalpha,
-                   const std::function<std::map<Customer, float64>(Customer)> &logdecay_func,
-                   const std::function<float64(const std::vector<Customer> &)> &loglikelihood_func) {
+void ddcrp_iterate(
+        std::function<float64()> gen,
+        Assignment &assignment,
+        float64 logalpha, // log(alpha)
+        const std::function<std::map<Customer, float64>(
+                Customer)> &logdecay_func, // logdecay = logdecay_func[customer1][customer2]
+        const std::function<float64(const std::vector<Customer> &)> &loglikelihood_func // loglikelihood of a compoentn
+) {
     auto target_list = std::vector<Customer>();
     auto logweight_list = std::vector<float64>();
     target_list.reserve(assignment.num_customers());

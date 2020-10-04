@@ -15,6 +15,8 @@ public:
 
     ~NIW() = default;
 
+    uint64 dimension() const;
+
     [[nodiscard]] float64 marginal_loglikelihood(const matrix &data, const std::vector<uint64> &index_list) const;
 
 private:
@@ -121,6 +123,10 @@ float64 NIW::marginal_loglikelihood(const matrix &data, const std::vector<uint64
     llh += 0.5 * m_v * m_logdet_S - 0.5 * posterior.m_v * posterior.m_logdet_S;
     llh += 0.5 * d * (m_log_k - posterior.m_log_k);
     return llh;
+}
+
+uint64 NIW::dimension() const {
+    return m_dim;
 }
 
 #endif //DDCRP_PRIOR_H

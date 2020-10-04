@@ -2,7 +2,7 @@ import time
 
 import scipy as sp
 import scipy.sparse
-from src.ddcrp.clustering import clustering
+from src.ddcrp.interface.clustering import clustering
 import networkx as nx
 import numpy as np
 

@@ -5,9 +5,11 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package(Eigen3 REQUIRED)
 
+find_package(OpenMP REQUIRED)
+
 add_library(ddcrp SHARED
-        src/ddcrp/clustering_c.cpp
-        src/ddcrp/clustering_c.h
+        src/ddcrp/interface/clustering_c.cpp
+        src/ddcrp/interface/clustering_c.h
         src/ddcrp/core/math.h
         src/ddcrp/core/common.h
         src/ddcrp/core/prior.h
