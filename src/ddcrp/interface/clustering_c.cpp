@@ -128,7 +128,7 @@ void iterate_state(
         );
         auto table = ddcrp.table_assignment();
         result.insert(result.end(), table.begin(), table.end());
-        std::cout << "iter: " << iter << "/" << num_iterations << std:: endl;
+        std::cout << "iter: " << iter+1 << "/" << num_iterations << std:: endl;
     }
     // result
     std::memcpy(cluster_assignment, result.data(), result.size() * sizeof(uint64));

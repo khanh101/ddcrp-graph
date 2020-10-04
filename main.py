@@ -53,7 +53,11 @@ def similarity_matrix(cluster_label_list: np.ndarray) -> np.ndarray:
             for i in c:
                 for j in c:
                     count[i][j] += 1
+    count = count / len(cluster_label_list)
     return count
+
+def average_degree(a: sp.sparse.coo_matrix) -> float:
+    return a.sum() / a.shape[0]
 
 
 dim = 50
@@ -81,8 +85,9 @@ g = nx.generators.community.stochastic_block_model(
     seed=seed,
 )
 a = nx.adjacency_matrix(g)
-#a = a.dot(a)
+# a = a.dot(a)
 a = sp.sparse.coo_matrix(a)
+print(f"average degree: {average_degree(a)}")
 a.data = a.data.astype(np.float64)
 print(f"num edges: {len(a.data)}")
 cluster_list = [set() for _ in range(num_clusters)]
