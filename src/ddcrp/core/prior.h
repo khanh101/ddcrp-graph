@@ -114,6 +114,7 @@ matrix NIW::uncentered_sum_of_squares(const matrix &data, const std::vector<uint
 }
 
 float64 NIW::marginal_loglikelihood(const matrix &data, const std::vector<uint64> &index_list) const {
+    // Ref: https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf
     auto posterior = this->posterior(data, index_list);
     auto n = float64(data.cols());
     auto d = float64(data.rows());
