@@ -65,14 +65,14 @@ def kmeans(emb: np.ndarray, num_clusters: int, init="k-means++") -> List[Set[int
     return comm
 
 if __name__ == "__main__":
-    num_iter = 5
+    num_iter = 50
     dim = 50
     num_clusters = 50 # 3
     prior_scale = 5
     cluster_scale = 1
     gamma = 2.0
-    num_points = 10000 # 10
-    cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
+    num_points = 1000 # 10
+    cluster_size = np.random.random(size=(num_clusters,)) ** gamma
     cluster_size /= cluster_size.sum()
     cluster_size *= num_points
     cluster_size = 1 + cluster_size.astype(np.int)
