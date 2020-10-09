@@ -16,7 +16,10 @@ def mcla(comm: List[Set[int]], num_clusters: int) -> List[Set[int]]:
         meta_graph.add_node(meta_node)
     for meta_node_1 in range(num_metanodes):
         for meta_node_2 in range(meta_node_1+1, num_metanodes):
-            meta_graph.add_edge(meta_node_1, meta_node_2, weight=jaccard(comm[meta_node_1], comm[meta_node_2]))
+            weight = jaccard(comm[meta_node_1], comm[meta_node_2])
+            if weight > 0.0:
+                meta_graph.add_edge(meta_node_1, meta_node_2, weight=weight)
+
 
     parition = community_louvain.best_partition(meta_graph)
     label = np.empty((num_metanodes,))
