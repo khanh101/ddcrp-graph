@@ -115,7 +115,7 @@ if __name__ == "__main__":
     print(f"deepwalk time: {t1-t0}")
 
     for e in range(len(a.data)):
-        a.data[e] = - 100000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
+        a.data[e] = - 10000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
     t0 = time.time()
     cluster_label_list = clustering(seed, num_iter, data, -float("inf"), a)
     t1 = time.time()
