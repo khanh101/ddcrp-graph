@@ -1,26 +1,29 @@
 from typing import List, Set
+
+import networkx as nx
 import numpy as np
 import sklearn
 import sklearn.cluster
 from src.mcla.util import jaccard, jaccard_single
 from src.util import label_to_comm
-
+import community as community_louvain
 
 def mcla(comm: List[Set[int]], num_clusters: int) -> List[Set[int]]:
     num_metanodes = len(comm)
     print(f"num metanodes: {num_metanodes}")
-    a = np.zeros((num_metanodes, num_metanodes), dtype=np.float64)
-    for i in range(num_metanodes):
-        for j in range(i+1, num_metanodes):
-            a[i][j] = jaccard(comm[i], comm[j])
-            a[j][i] = a[i][j]
-    #d = np.diag(a.sum(axis=0))
-    #l = d - a
-    metacomm = label_to_comm(sklearn.cluster.SpectralClustering(
-        n_clusters= num_clusters,
-        assign_labels="kmeans",
-        affinity="precomputed",
-    ).fit_predict(a))
+    meta_graph = nx.Graph()
+    for meta_node in range(num_metanodes):
+        meta_graph.add_node(meta_node)
+    for meta_node_1 in range(num_metanodes):
+        for meta_node_2 in range(meta_node_1+1, num_metanodes):
+            meta_graph.add_edge(meta_node_1, meta_node_2, weight=jaccard(comm[meta_node_1], comm[meta_node_2]))
+
+    parition = community_louvain.best_partition(meta_graph)
+    label = np.empty((num_metanodes,))
+    for meta_node in range(num_metanodes):
+        label[meta_node] = parition[meta_node]
+
+    metacomm = label_to_comm(label)
 
     metacomm_nodes = []
     for metac in metacomm:
