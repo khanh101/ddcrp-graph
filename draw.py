@@ -10,6 +10,7 @@ def draw_mat(a: np.ndarray, name: str = None):
     if name is not None:
         plt.savefig(f"{name}.png")
     plt.show()
+    plt.clf()
 
 
 def draw_size(size_list: List[int], bins: int = 10, name: str= None):
@@ -21,6 +22,7 @@ def draw_size(size_list: List[int], bins: int = 10, name: str= None):
     if name is not None:
         plt.savefig(f"{name}.png")
     plt.show()
+    plt.clf()
 
 
 def draw_data(data: np.ndarray, cluster_list: List[Set[int]] = [], name: str= None):
@@ -38,4 +40,5 @@ def draw_data(data: np.ndarray, cluster_list: List[Set[int]] = [], name: str= No
     if name is not None:
         plt.savefig(f"{name}.png")
     plt.show()
+    plt.clf()
 
