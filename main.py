@@ -57,39 +57,6 @@ def similarity_matrix(cluster_label_list: np.ndarray) -> np.ndarray:
     count = count / len(cluster_label_list)
     return count
 
-def precision_recall(true_cluster_list: List[Set[int]], pred_cluster_list: List[Set[int]]) -> Tuple[float, float, float]:
-    def cluster_list_to_label(cluster_list: List[Set[int]]):
-        num_nodes = sum([len(c) for c in cluster_list])
-        cluster_label = np.zeros(num_nodes)
-        for label, c in enumerate(cluster_list):
-            for node in c:
-                cluster_label[node] = label
-        return cluster_label
-
-    true_cluster_label = cluster_list_to_label(true_cluster_list)
-    pred_cluster_label = cluster_list_to_label(pred_cluster_list)
-    num_nodes = sum([len(c) for c in true_cluster_list])
-    tp = 0
-    tn = 0
-    fp = 0
-    fn = 0
-    for i in range(num_nodes):
-        for j in range(i+1, num_nodes):
-           if pred_cluster_label[i] == pred_cluster_label[j]:
-               if true_cluster_label[i] == true_cluster_label[j]:
-                   tp += 1
-               else:
-                   fp += 1
-           else:
-               if true_cluster_label[i] != true_cluster_label[j]:
-                   tn += 1
-               else:
-                   fn += 1
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    f1 = 2 / (1/precision + 1/recall)
-    print(f"precision {precision} recall {recall} f1 {f1}")
-    return precision, recall, f1
 
 def kmeans(emb: np.ndarray, num_clusters: int, init="k-means++") -> List[Set[int]]:
     clustering = sklearn.cluster.KMeans(n_clusters=num_clusters, init=init).fit(emb)
@@ -98,12 +65,13 @@ def kmeans(emb: np.ndarray, num_clusters: int, init="k-means++") -> List[Set[int
     return comm
 
 if __name__ == "__main__":
+    num_iter = 5
     dim = 50
-    num_clusters = 10 # 3
+    num_clusters = 50 # 3
     prior_scale = 5
     cluster_scale = 1
-    gamma = 2.5
-    num_points = 1000 # 10
+    gamma = 2.0
+    num_points = 10000 # 10
     cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
     cluster_size /= cluster_size.sum()
     cluster_size *= num_points
@@ -126,6 +94,7 @@ if __name__ == "__main__":
     # a = a.dot(a)
     a = sp.sparse.coo_matrix(a)
     a.data = a.data.astype(np.float64)
+    print(f"num nodes: {num_points}")
     print(f"num edges: {len(a.data)}")
     print(f"average degree: {len(a.data) / num_points}")
     true_cluster_list = [set() for _ in range(num_clusters)]
@@ -146,9 +115,9 @@ if __name__ == "__main__":
     print(f"deepwalk time: {t1-t0}")
 
     for e in range(len(a.data)):
-        a.data[e] = - 100000000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
+        a.data[e] = - 100000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
     t0 = time.time()
-    cluster_label_list = clustering(seed, 1+int(7000 / num_points), data, -float("inf"), a)
+    cluster_label_list = clustering(seed, num_iter, data, -float("inf"), a)
     t1 = time.time()
     print(f"ddcrp time: {t1-t0}")
 
@@ -164,12 +133,11 @@ if __name__ == "__main__":
 
     pred_cluster_list = mcla(comm, num_clusters)
     pred_cluster_list.sort(key=lambda cluster: len(cluster))
-    print(len(pred_cluster_list))
-    print(pred_cluster_list)
+    print(f"cluster size: {len(pred_cluster_list)}")
+    #print(pred_cluster_list)
     draw_size([len(cluster) for cluster in pred_cluster_list], name="predicted_size")
 
     print(f"ddcrp modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
-    precision_recall(true_cluster_list, pred_cluster_list)
 
     # init kmeans
     cluster_emb = []
@@ -184,10 +152,8 @@ if __name__ == "__main__":
 
     pred_cluster_list = kmeans(data, len(pred_cluster_list), cluster_emb)
     print(f"init kmeans modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
-    precision_recall(true_cluster_list, pred_cluster_list)
     draw_size([len(cluster) for cluster in pred_cluster_list], name="init_kmeans_size")
 
     pred_cluster_list = kmeans(data, len(pred_cluster_list))
     print(f"non-init kmeans modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
-    precision_recall(true_cluster_list, pred_cluster_list)
     draw_size([len(cluster) for cluster in pred_cluster_list], name="noninit_kmeans_size")

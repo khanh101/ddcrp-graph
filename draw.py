@@ -18,7 +18,7 @@ def draw_size(size_list: List[int], bins: int = 10, name: str= None):
     centers = []
     for i in range(len(hist)):
         centers.append((edges[i] + edges[i+1])/2)
-    plt.plot(centers, hist)
+    plt.bar(centers, hist)
     if name is not None:
         plt.savefig(f"{name}.png")
     plt.show()
