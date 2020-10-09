@@ -110,7 +110,7 @@ if __name__ == "__main__":
     cluster_size = 1 + cluster_size.astype(np.int)
     num_points = sum(cluster_size)
 
-    draw_size(cluster_size, "actual_size")
+    draw_size(cluster_size, name="actual_size")
     p_in = 100 / num_points
     p_out = p_in / 10
     p = (p_in * np.identity(len(cluster_size))) + p_out
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     print(f"ddcrp time: {t1-t0}")
 
     sim = similarity_matrix(cluster_label_list)
-    draw_mat(sim, "similarity")
+    draw_mat(sim, name="similarity")
 
     num_clusters = None
     comm = []
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     pred_cluster_list.sort(key=lambda cluster: len(cluster))
     print(len(pred_cluster_list))
     print(pred_cluster_list)
-    draw_size([len(cluster) for cluster in pred_cluster_list], "predicted_size")
+    draw_size([len(cluster) for cluster in pred_cluster_list], name="predicted_size")
 
     print(f"ddcrp modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
     precision_recall(true_cluster_list, pred_cluster_list)
@@ -185,9 +185,9 @@ if __name__ == "__main__":
     pred_cluster_list = kmeans(data, len(pred_cluster_list), cluster_emb)
     print(f"init kmeans modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
     precision_recall(true_cluster_list, pred_cluster_list)
-    draw_size([len(cluster) for cluster in pred_cluster_list], "init_kmeans_size")
+    draw_size([len(cluster) for cluster in pred_cluster_list], name="init_kmeans_size")
 
     pred_cluster_list = kmeans(data, len(pred_cluster_list))
     print(f"non-init kmeans modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
     precision_recall(true_cluster_list, pred_cluster_list)
-    draw_size([len(cluster) for cluster in pred_cluster_list], "noninit_kmeans_size")
+    draw_size([len(cluster) for cluster in pred_cluster_list], name="noninit_kmeans_size")
