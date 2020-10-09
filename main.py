@@ -27,8 +27,6 @@ def deepwalk(a: sp.sparse.coo_matrix, dim: int, nonbacktracking: bool = False) -
     degree_normalization = False
     w = Walk(a)
     walks = w.walk(
-        degree_normalization=degree_normalization,
-        nonbacktracking=nonbacktracking,
         walks_per_node=walks_per_node,
         walk_length=walk_length,
     )
@@ -93,85 +91,103 @@ def precision_recall(true_cluster_list: List[Set[int]], pred_cluster_list: List[
     print(f"precision {precision} recall {recall} f1 {f1}")
     return precision, recall, f1
 
-def kmeans(emb: np.ndarray, num_clusters: int) -> List[Set[int]]:
-    clustering = sklearn.cluster.KMeans(n_clusters=num_clusters).fit(emb)
+def kmeans(emb: np.ndarray, num_clusters: int, init="k-means++") -> List[Set[int]]:
+    clustering = sklearn.cluster.KMeans(n_clusters=num_clusters, init=init).fit(emb)
     pred = clustering.labels_
     comm = label_to_comm(pred)
     return comm
 
-dim = 50
-num_clusters = 100 # 3
-prior_scale = 5
-cluster_scale = 1
-gamma = 2.5
-num_points = 5000 # 10
-cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
-cluster_size /= cluster_size.sum()
-cluster_size *= num_points
-cluster_size = 1 + cluster_size.astype(np.int)
-num_points = sum(cluster_size)
+if __name__ == "__main__":
+    dim = 50
+    num_clusters = 10 # 3
+    prior_scale = 5
+    cluster_scale = 1
+    gamma = 2.5
+    num_points = 1000 # 10
+    cluster_size = np.random.random(size=(num_clusters,)) ** 2.5
+    cluster_size /= cluster_size.sum()
+    cluster_size *= num_points
+    cluster_size = 1 + cluster_size.astype(np.int)
+    num_points = sum(cluster_size)
 
-draw_size(cluster_size)
-p_in = 500 / num_points
-p_out = p_in / 10
-p = (p_in * np.identity(len(cluster_size))) + p_out
+    draw_size(cluster_size)
+    p_in = 100 / num_points
+    p_out = p_in / 10
+    p = (p_in * np.identity(len(cluster_size))) + p_out
 
 
 
-g = nx.generators.community.stochastic_block_model(
-    sizes=cluster_size,
-    p=p,
-    seed=seed,
-)
-a = nx.adjacency_matrix(g)
-# a = a.dot(a)
-a = sp.sparse.coo_matrix(a)
-a.data = a.data.astype(np.float64)
-print(f"num edges: {len(a.data)}")
-print(f"average degree: {len(a.data) / num_points}")
-true_cluster_list = [set() for _ in range(num_clusters)]
-count = 0
-for cluster, size in enumerate(cluster_size):
-    for _ in range(size):
-        true_cluster_list[cluster].add(count)
-        count += 1
+    g = nx.generators.community.stochastic_block_model(
+        sizes=cluster_size,
+        p=p,
+        seed=seed,
+    )
+    a = nx.adjacency_matrix(g)
+    # a = a.dot(a)
+    a = sp.sparse.coo_matrix(a)
+    a.data = a.data.astype(np.float64)
+    print(f"num edges: {len(a.data)}")
+    print(f"average degree: {len(a.data) / num_points}")
+    true_cluster_list = [set() for _ in range(num_clusters)]
+    count = 0
+    for cluster, size in enumerate(cluster_size):
+        for _ in range(size):
+            true_cluster_list[cluster].add(count)
+            count += 1
 
-print(f"max modularity: {nx.algorithms.community.quality.modularity(g, true_cluster_list)}")
+    print(f"max modularity: {nx.algorithms.community.quality.modularity(g, true_cluster_list)}")
 
-t0 = time.time()
-data = deepwalk(a, dim)
+    t0 = time.time()
+    data = deepwalk(a, dim)
 
-data -= data.mean(axis=0)
-data /= data.std(axis=0).mean()
-t1 = time.time()
-print(f"deepwalk time: {t1-t0}")
+    data -= data.mean(axis=0)
+    data /= data.std(axis=0).mean()
+    t1 = time.time()
+    print(f"deepwalk time: {t1-t0}")
 
-for e in range(len(a.data)):
-    a.data[e] = - 10000000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
-t0 = time.time()
-cluster_label_list = clustering(seed, 1+int(17000 / num_points), data, -float("inf"), a)
-t1 = time.time()
-print(f"ddcrp time: {t1-t0}")
+    for e in range(len(a.data)):
+        a.data[e] = - 100000000 * ((data[a.col[e]] - data[a.row[e]])**2).sum()
+    t0 = time.time()
+    cluster_label_list = clustering(seed, 1+int(7000 / num_points), data, -float("inf"), a)
+    t1 = time.time()
+    print(f"ddcrp time: {t1-t0}")
 
-sim = similarity_matrix(cluster_label_list)
-draw_mat(sim)
+    sim = similarity_matrix(cluster_label_list)
+    draw_mat(sim)
 
-num_clusters = None
-comm = []
-for cluster_label in cluster_label_list:
-    c = label_to_comm(cluster_label)
-    num_clusters = len(c)
-    comm.extend(c)
+    num_clusters = None
+    comm = []
+    for cluster_label in cluster_label_list:
+        c = label_to_comm(cluster_label)
+        num_clusters = len(c)
+        comm.extend(c)
 
-pred_cluster_list = mcla(comm, num_clusters)
-pred_cluster_list.sort(key=lambda cluster: len(cluster))
-print(len(pred_cluster_list))
-print(pred_cluster_list)
-draw_size(sorted([len(cluster) for cluster in pred_cluster_list]))
+    pred_cluster_list = mcla(comm, num_clusters)
+    pred_cluster_list.sort(key=lambda cluster: len(cluster))
+    print(len(pred_cluster_list))
+    print(pred_cluster_list)
+    draw_size([len(cluster) for cluster in pred_cluster_list])
 
-print(f"ddcrp modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
-precision_recall(true_cluster_list, pred_cluster_list)
+    print(f"ddcrp modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
+    precision_recall(true_cluster_list, pred_cluster_list)
 
-pred_cluster_list = kmeans(data, len(pred_cluster_list))
-print(f"kmeans modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
-precision_recall(true_cluster_list, pred_cluster_list)
+    # init kmeans
+    cluster_emb = []
+    for cluster in pred_cluster_list:
+        emb = np.zeros(dim)
+        for node in cluster:
+            emb += data[node]
+        emb /= len(cluster)
+        cluster_emb.append(emb)
+    cluster_emb = np.array(cluster_emb)
+
+
+    pred_cluster_list = kmeans(data, len(pred_cluster_list), cluster_emb)
+    print(f"init kmeans modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
+    precision_recall(true_cluster_list, pred_cluster_list)
+    draw_size([len(cluster) for cluster in pred_cluster_list])
+
+    pred_cluster_list = kmeans(data, len(pred_cluster_list))
+    print(f"non-init kmeans modularity: {nx.algorithms.community.quality.modularity(g, pred_cluster_list)}")
+    precision_recall(true_cluster_list, pred_cluster_list)
+    draw_size([len(cluster) for cluster in pred_cluster_list])
