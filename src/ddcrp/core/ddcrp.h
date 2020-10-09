@@ -101,7 +101,7 @@ std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
         adding.insert(node.m_parent);
         for (Customer new_customer: adding) {
             if (new_customer != customer_nil and not is_in_list(frontier, new_customer) and
-                not visited.contains(new_customer)) {
+                not (visited.find(new_customer) != visited.end())) {
                 frontier.push_back(new_customer);
             }
         }
@@ -184,7 +184,7 @@ void ddcrp_iterate(
         for (auto it = logdecay_map.begin(); it != logdecay_map.end(); ++it) {
             target_list.push_back(it->first);
         }
-        if (not logdecay_map.contains(source)) {
+        if (not (logdecay_map.find(source) != logdecay_map.end())) {
             target_list.push_back(source);
         }
         logweight_list.clear();
