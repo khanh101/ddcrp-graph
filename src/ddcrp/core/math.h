@@ -4,7 +4,6 @@
 #ifndef DDCRP_MATH_H
 #define DDCRP_MATH_H
 
-#include<numbers>
 #include <cmath>
 #include <random>
 #include "common.h"
@@ -18,7 +17,7 @@ namespace math {
         return std::exp(x);
     }
 
-    const float64 log_pi = std::log(std::numbers::pi_v<double>);
+    const float64 log_pi = std::log(3.1415926535897932384626433832795028841971693993751058209749445923078164062);
 
     float64 multi_lgamma(float64 a, uint64 d) {
         if (a <= 0.5 * float64(d - 1)) {
