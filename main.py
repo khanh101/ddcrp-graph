@@ -26,11 +26,11 @@ for approx_num_nodes in range(500, 2001, 500):
     upper_scale = 100000
     scale = upper_scale
     while True:
-        log.write_log("all", f"scale {scale}")
+        log.write_log(f"scale {scale}")
         model = Model(seed, g.number_of_nodes(), dim)
         comm, kmeans_improved_comm, kmeans_comm = model.iterate(g, ddcrp_scale=scale)
         diff = abs(len(kmeans_improved_comm) - len(actual_comm)) / len(actual_comm)
-        log.write_log("all", f"scale {scale} diff {diff}")
+        log.write_log(f"scale {scale} diff {diff}")
         log.write_log(f"cluster size {len(kmeans_improved_comm)} kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improved_comm)}")
         log.write_log(f"cluster size {len(kmeans_comm)} kmeans naive    modularity: {nx.algorithms.community.quality.modularity(g, kmeans_comm)}")
         if diff < 0.1:
