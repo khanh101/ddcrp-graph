@@ -65,7 +65,7 @@ class Model(object):
             comm_list.extend(label_to_comm(label))
         # mcla
         comm = mcla(comm_list)
-        draw_size([len(c) for c in comm], name="predicted_size")
+        draw_size([len(c) for c in comm], name="predicted_size", log=True)
         print(f"predicted num clusters {len(comm)}")
         print(f"initial modularity: {nx.algorithms.community.quality.modularity(g, comm)}")
         kmeans_improved_comm = kmeans_improve(embedding, comm)

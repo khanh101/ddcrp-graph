@@ -1,9 +1,12 @@
-from typing import List, Set
+from typing import List, Set, Tuple
 
 import networkx as nx
 import numpy as np
 import scipy as sp
 import scipy.sparse
+import sklearn
+import sklearn.linear_model
+
 
 def comm_to_label(comm: List[Set[int]]) -> np.ndarray:
     num_nodes = sum([len(c) for c in comm])
@@ -58,3 +61,16 @@ def receptive_field(g: nx.Graph, hop: int=1) -> sp.sparse.coo_matrix:
     out = sp.sparse.coo_matrix(out)
     out.data = out.data.astype(np.bool)
     return out
+
+def linear_regression(X: np.ndarray, y: np.array) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    y = X coef + intercept
+    :param X: (n x feature)
+    :param y: (n x target)
+    :return:
+    :coef: (feature x target)
+    :intercept: (target)
+    """
+    model: sklearn.linear_model.LinearRegression = sklearn.linear_model.LinearRegression()
+    model.fit(X, y)
+    return model.coef_.T, model.intercept_

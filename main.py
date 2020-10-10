@@ -3,7 +3,7 @@ import networkx as nx
 import numpy as np
 
 from src.draw import draw_size, draw_mat
-from graph.sbm import sbm
+from graph.sbm import sbm, preferential_attachment_cluster
 from src.model.model import Model
 from src.util import comm_to_label, similarity_matrix
 
@@ -16,12 +16,12 @@ gamma = 2.5
 approx_num_nodes = 1000
 approx_avg_degree = 50
 
-g, comm = sbm(num_clusters, gamma, approx_num_nodes, approx_avg_degree)
+g, comm = sbm(preferential_attachment_cluster(num_clusters, gamma), approx_num_nodes, approx_avg_degree)
 print(f"num clusters: {len(comm)}")
 print(f"average degree: {2 * g.number_of_edges() / g.number_of_nodes()}")
 print(f"max modularity: {nx.algorithms.community.quality.modularity(g, comm)}")
 num_nodes = g.number_of_nodes()
-draw_size([len(c) for c in comm], name="actual_size")
+draw_size([len(c) for c in comm], name="actual_size", log=True)
 
 label = comm_to_label(comm)
 label_list = np.array([label])
