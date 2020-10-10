@@ -1,5 +1,5 @@
 import time
-from typing import List, Set
+from typing import List, Set, Any
 
 import numpy as np
 import networkx as nx
@@ -31,7 +31,7 @@ class Model(object):
             ddcrp_logalpha: float= -float("inf"),
             receptive_hop: int = 1,
             ddcrp_scale: float = 5000,
-    ):
+    ) -> Any:
         # deepwalk
         walks_per_node: int = int(2 * g.number_of_edges() / g.number_of_nodes())
         walk_length: int = 3 * self.context
@@ -66,9 +66,6 @@ class Model(object):
         # mcla
         comm = mcla(comm_list)
         draw_size([len(c) for c in comm], name="predicted_size", log=True)
-        print(f"predicted num clusters {len(comm)}")
-        print(f"initial modularity: {nx.algorithms.community.quality.modularity(g, comm)}")
         kmeans_improved_comm = kmeans_improve(embedding, comm)
         kmeans_comm = kmeans_improve(embedding, len(comm))
-        print(f"kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improved_comm)}")
-        print(f"kmeans naive modularity: {nx.algorithms.community.quality.modularity(g, kmeans_comm)}")
+        return comm, kmeans_improved_comm, kmeans_comm
