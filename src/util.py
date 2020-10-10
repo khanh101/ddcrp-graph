@@ -1,5 +1,6 @@
 from typing import List, Set
 
+import networkx as nx
 import numpy as np
 
 def comm_to_label(comm: List[Set[int]]) -> np.ndarray:
@@ -18,3 +19,16 @@ def label_to_comm(label_list: np.ndarray) -> List[Set[int]]:
             communities[label] = set()
         communities[label].add(node)
     return list(communities.values())
+
+def subgraph_by_timestamp(mg: nx.MultiGraph, start: int, end: int) -> nx.Graph:
+    edges = filter(
+        lambda edge: start <= edge[2]["timestamp"] and edge[2]["timestamp"] < end,
+        mg.edges(data=True),
+    )
+    g = nx.Graph()
+    for u, v, data in edges:
+        if g.has_edge(u, v):
+            g[u][v]["weight"] += data["weight"]
+        else:
+            g.add_edge(u, v, weight=data["weight"])
+    return g
