@@ -23,15 +23,11 @@ class Model(object):
         self.ddcrp = DDCRP(seed, num_nodes, dim)
         self.context = context
 
-    def iterate(
+    def deepwalk_embedding(
             self,
             g: nx.Graph,
             deepwalk_epochs: int=10,
-            ddcrp_iterations: int=10,
-            ddcrp_logalpha: float= -float("inf"),
-            receptive_hop: int = 1,
-            ddcrp_scale: float = 5000,
-    ) -> Any:
+    ) -> np.ndarray:
         # deepwalk
         walks_per_node: int = int(2 * g.number_of_edges() / g.number_of_nodes())
         walk_length: int = 3 * self.context
@@ -41,6 +37,17 @@ class Model(object):
         print(f"deepwalk time: {time.time() - t0}s")
         embedding -= embedding.mean(axis=0)  # normalized
         embedding /= embedding.std(axis=0).mean()  # normalized
+        return embedding
+
+    def ddcrp_iterate(
+            self,
+            g: nx.Graph,
+            embedding: np.ndarray,
+            ddcrp_iterations: int=10,
+            ddcrp_logalpha: float= -float("inf"),
+            receptive_hop: int = 1,
+            ddcrp_scale: float = 5000,
+    ) -> Any:
         # ddcrp
         adj = receptive_field(g, receptive_hop)
 
