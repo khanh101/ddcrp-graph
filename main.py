@@ -55,7 +55,7 @@ def distance(scale: int = 10000):
     data = np.empty((len(adj.data),), dtype=np.float64)
     for e in range(len(adj.data)):
         u, v = adj.col[e], adj.row[e]
-        data[e] = - scale * (embedding[u] - embedding[v]) ** 2
+        data[e] = - scale * ((embedding[u] - embedding[v]) ** 2).sum()
     return data
 
 
