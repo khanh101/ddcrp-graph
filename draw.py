@@ -16,6 +16,8 @@ def draw_mat(a: np.ndarray, name: str = None):
 
 def draw_size(size_list: List[int], bins: int = 10, name: str= None):
     plt.title(name)
+    plt.xlabel("cluster size")
+    plt.ylabel("occurrences")
     hist, edges = np.histogram(np.array(size_list), bins=bins)
     centers = []
     for i in range(len(hist)):

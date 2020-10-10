@@ -7,7 +7,7 @@ class Node(object):
         self.name: str = name
 
     def __str__(self) -> str:
-        return f"{{{self.index}: {self.name}}}"
+        return f"Node{{index={self.index}: name={self.name}}}"
 
 
 class Edge(object):
@@ -19,7 +19,7 @@ class Edge(object):
         self.weight: float = weight
 
     def __str__(self) -> str:
-        return f"{{{self.index}: {self.source}->{self.target}: {self.weight}}}"
+        return f"Edge{{index={self.index}: {self.source}->{self.target}: weight={self.weight}, timestamp={self.timestamp}}}"
 
 class Loader(object):
     def __init__(self, dataset_name: str = "email"):

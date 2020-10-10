@@ -65,17 +65,17 @@ def kmeans(emb: np.ndarray, num_clusters: int, init="k-means++") -> List[Set[int
     return comm
 
 if __name__ == "__main__":
-    num_iter = 50
+    num_iter = 10
     dim = 50
-    num_clusters = 50 # 3
-    prior_scale = 5
+    num_clusters = 50 # 10
     cluster_scale = 1
     gamma = 2.0
-    num_points = 1000 # 10
-    cluster_size = np.random.random(size=(num_clusters,)) ** gamma
+    num_points = 500 # 300
+    #cluster_size = np.random.random(size=(num_clusters,)) ** gamma
+    cluster_size = np.arange(0, 1, 1/num_clusters) ** gamma
     cluster_size /= cluster_size.sum()
     cluster_size *= num_points
-    cluster_size = 1 + cluster_size.astype(np.int)
+    cluster_size = 1 + np.rint(cluster_size).astype(np.int)
     num_points = sum(cluster_size)
 
     draw_size(cluster_size, name="actual_size")
@@ -90,8 +90,8 @@ if __name__ == "__main__":
         p=p,
         seed=seed,
     )
-    a = nx.adjacency_matrix(g)
-    # a = a.dot(a)
+    a = nx.adjacency_matrix(g) + sp.sparse.identity(num_points)
+    a = a.dot(a)
     a = sp.sparse.coo_matrix(a)
     a.data = a.data.astype(np.float64)
     print(f"num nodes: {num_points}")
