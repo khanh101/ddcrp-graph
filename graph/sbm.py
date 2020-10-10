@@ -13,7 +13,7 @@ def sbm(num_clusters: int, gamma: float, appox_num_nodes: float, approx_avg_degr
     num_nodes = cluster_size.sum()
     sum_of_edges = approx_avg_degree * num_nodes / 2
     alpha = 10.0 # p_in / p_out
-    p_out = sum_of_edges / (num_nodes**2 + sum([(alpha-1)*size**2 for size in cluster_size]))
+    p_out = 2 * sum_of_edges / (num_nodes**2 + sum([(alpha-1)*size**2 for size in cluster_size]))
     p_inn = alpha * p_out
     p = p_out * np.ones((num_clusters, num_clusters)) + (p_inn-p_out) * np.identity(num_clusters)
 
