@@ -21,6 +21,7 @@ class Log(object):
                 pass
         with open(filepath, "a") as fp:
             fp.write(f"{data}\n")
+            print(f"{data}\n")
 
     def write_log(self, name: str, data: str):
         self.write(name, f"{datetime.datetime.now()}: {data}")
