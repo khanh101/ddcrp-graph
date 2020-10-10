@@ -74,7 +74,7 @@ for label in label_list:
 comm = mcla(comm_list)
 draw_size([len(c) for c in comm], name="predicted_size")
 # evaluate
-print(f"predicted num clusters")
+print(f"predicted num clusters {len(comm)}")
 print(f"initial modularity: {nx.algorithms.community.quality.modularity(g, comm)}")
 print(f"kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improve(embedding, comm))}")
 print(f"kmeans naive modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improve(embedding, len(comm)))}")
