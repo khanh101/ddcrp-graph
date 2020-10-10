@@ -21,6 +21,14 @@ find_package(OpenMP)
 if (OpenMP_CXX_FOUND)
     target_link_libraries(ddcrp PUBLIC OpenMP::OpenMP_CXX)
 endif ()
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(" ")
     message("CMAKE IN DEBUG MODE")
@@ -30,3 +38,5 @@ elseif (CMAKE_BUILD_TYPE MATCHES Release)
     message("CMAKE IN RELEASE MODE")
     message(" ")
 endif ()
+
+

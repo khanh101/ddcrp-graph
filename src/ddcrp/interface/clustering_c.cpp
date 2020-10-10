@@ -75,7 +75,7 @@ void iterate_state(
     };
 
     auto result = std::vector<uint64>();
-    for (auto iter = 0; iter < num_iterations; iter++) {
+    for (uint64 iter = 0; iter < num_iterations; iter++) {
         ddcrp_iterate(
                 gen,
                 ddcrp,
