@@ -24,7 +24,7 @@ class Log(object):
             print(f"{data}\n")
 
     def write_log(self, data: str, name: str="default"):
-        self.write(name, f"{datetime.datetime.now()}: {data}")
+        self.write(f"{datetime.datetime.now()}: {data}", name)
 
 # default log
 log = Log()
