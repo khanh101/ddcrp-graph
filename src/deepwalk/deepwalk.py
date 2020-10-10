@@ -23,6 +23,7 @@ class DeepWalk(object):
             iter=1,
         )
         self.vocab = False
+        print(f"deepwalk created with {workers} workers")
 
     def train(self, walks: List[List[int]], epochs: int) -> np.ndarray:
         nodes = []
