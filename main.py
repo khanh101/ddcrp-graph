@@ -24,7 +24,7 @@ for approx_num_nodes in range(500, 2001, 500):
     draw_size([len(c) for c in actual_comm], name="actual_size", log=True)
 
     embedding = Model(seed, g.number_of_nodes(), dim).deepwalk_embedding(g)
-    for scale in range(5000, 100000, 5000):
+    for scale in range(1000, 30000, 1000):
         log.write_log(f"scale {scale}")
         comm, kmeans_improved_comm, kmeans_comm = Model(seed, g.number_of_nodes(), dim).ddcrp_iterate(g, embedding, ddcrp_scale=scale)
         diff = abs(len(kmeans_improved_comm) - len(actual_comm)) / len(actual_comm)
