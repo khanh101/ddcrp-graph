@@ -28,6 +28,8 @@ def subgraph_by_timestamp(mg: nx.MultiGraph, start: int, end: int) -> nx.Graph:
         mg.edges(data=True),
     )
     g = nx.Graph()
+    for node in mg.nodes():
+        g.add_node(node)
     for u, v, data in edges:
         if g.has_edge(u, v):
             g[u][v]["weight"] += data["weight"]

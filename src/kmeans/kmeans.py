@@ -3,7 +3,7 @@ from typing import List, Set, Union
 import sklearn
 import sklearn.cluster
 import numpy as np
-from util import label_to_comm
+from src.util import label_to_comm
 
 
 def kmeans_improve(embedding: np.ndarray, init_comm: Union[int, List[Set[int]]]):
