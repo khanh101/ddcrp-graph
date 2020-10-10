@@ -2,13 +2,11 @@ from typing import List, Set
 
 import networkx as nx
 import numpy as np
-import sklearn
-import sklearn.cluster
 from src.mcla.util import jaccard, jaccard_single
-from src.util import label_to_comm
+from util import label_to_comm
 import community as community_louvain
 
-def mcla(comm: List[Set[int]], num_clusters: int) -> List[Set[int]]:
+def mcla(comm: List[Set[int]]) -> List[Set[int]]:
     num_metanodes = len(comm)
     print(f"num metanodes: {num_metanodes}")
     meta_graph = nx.Graph()

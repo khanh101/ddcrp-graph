@@ -4,7 +4,7 @@ from typing import List
 import networkx as nx
 import numpy as np
 
-from src.deepwalk.walk import walk
+from src.deepwalk.walk import random_walk
 from gensim.models import Word2Vec
 
 workers: int = int(os.popen('grep -c cores /proc/cpuinfo').read())
@@ -49,7 +49,7 @@ def deepwalk(g: nx.Graph, dim: int) -> np.ndarray:
     context = 5
     num_iterations = 10
 
-    walks = walk(g, walks_per_node, walk_length)
+    walks = random_walk(g, walks_per_node, walk_length)
 
     embedding_list = Word2Vec(
         num_nodes=num_nodes,
