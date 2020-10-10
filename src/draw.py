@@ -46,8 +46,7 @@ def draw_size(size_list: List[int], bins: int = 10, name: str= None, log: bool=F
         minY = coef * minX + intercept
         maxY = coef * maxX + intercept
         plt.plot([minX, maxX], [minY, maxY])
-        name = f"{name}: log(y) = {coef}*log(x) + {intercept}"
-        plt.title(name)
+        plt.title(f"{name}: log(y) = {coef}*log(x) + {intercept}")
         plt.xlabel("log(cluster size)")
         plt.ylabel("log(occurrences)")
 
