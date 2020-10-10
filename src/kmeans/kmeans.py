@@ -1,6 +1,7 @@
 from typing import List, Set, Union
 
 import sklearn
+import sklearn.cluster
 import numpy as np
 from util import label_to_comm
 
