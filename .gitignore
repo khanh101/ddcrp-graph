@@ -132,3 +132,4 @@ dmypy.json
 
 # mine
 test.py
+*.log
