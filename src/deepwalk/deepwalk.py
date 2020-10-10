@@ -1,10 +1,8 @@
 import os
 from typing import List
 
-import networkx as nx
 import numpy as np
 
-from src.deepwalk.walk import random_walk
 from gensim.models import Word2Vec
 
 workers: int = int(os.popen('grep -c cores /proc/cpuinfo').read())
@@ -42,26 +40,3 @@ class DeepWalk(object):
         vector_list: List[np.ndarray] = [self.word2vec.wv[str(node)] for node in range(num_nodes)]
         return np.array(vector_list)
 
-
-def deepwalk(g: nx.Graph, dim: int) -> np.ndarray:
-    num_nodes = a.shape[0]
-    walks_per_node = 20
-    walk_length = 10
-    context = 5
-    num_iterations = 10
-
-    walks = random_walk(g, walks_per_node, walk_length)
-
-    embedding_list = Word2Vec(
-        num_nodes=num_nodes,
-        walks=walks,
-        dim=dim,
-        context=context,
-        num_iterations=num_iterations,
-    )
-
-    emb = np.zeros(shape=(num_nodes, dim))
-    for node, emb_vec in enumerate(embedding_list):
-        emb[node, :] = emb_vec
-
-    return emb
