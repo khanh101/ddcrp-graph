@@ -20,19 +20,20 @@ dim = 50
 
 for approx_num_nodes in range(500, 2001, 500):
     g, actual_comm = sbm(preferential_attachment_cluster(num_clusters, gamma), approx_num_nodes, approx_avg_degree)
-    log.write_log("all", f"generated graph: size {g.number_of_nodes()}, cluster size {len(actual_comm)} average degree: {2 * g.number_of_edges() / g.number_of_nodes()} max modularity: {nx.algorithms.community.quality.modularity(g, actual_comm)}")
+    log.write_log(f"generated graph: size {g.number_of_nodes()}, cluster size {len(actual_comm)} average degree: {2 * g.number_of_edges() / g.number_of_nodes()} max modularity: {nx.algorithms.community.quality.modularity(g, actual_comm)}")
     draw_size([len(c) for c in actual_comm], name="actual_size", log=True)
 
     upper_scale = 100000
     scale = upper_scale
     while True:
+        log.write_log("all", f"scale {scale}")
         model = Model(seed, g.number_of_nodes(), dim)
         comm, kmeans_improved_comm, kmeans_comm = model.iterate(g, ddcrp_scale=scale)
         diff = abs(len(kmeans_improved_comm) - len(actual_comm)) / len(actual_comm)
-        print(f"scale {scale} diff {diff}")
+        log.write_log("all", f"scale {scale} diff {diff}")
+        log.write_log(f"cluster size {len(kmeans_improved_comm)} kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improved_comm)}")
+        log.write_log(f"cluster size {len(kmeans_comm)} kmeans naive    modularity: {nx.algorithms.community.quality.modularity(g, kmeans_comm)}")
         if diff < 0.1:
-            log.write_log("all", f"cluster size {len(kmeans_improved_comm)} kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improved_comm)}")
-            log.write_log("all", f"cluster size {len(kmeans_comm)} kmeans naive    modularity: {nx.algorithms.community.quality.modularity(g, kmeans_comm)}")
             break
         if len(kmeans_improved_comm) > len(actual_comm):
             upper_scale = scale
