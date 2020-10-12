@@ -190,6 +190,7 @@ void ddcrp_iterate(
         logweight_list.clear();
         logweight_list.resize(target_list.size(), -std::numeric_limits<float64>::infinity());
         assignment.unlink(source);
+        auto source_component = assignment.component(source);
         #pragma omp parallel for
         for (uint64 i = 0; i < target_list.size(); i++) {
             Customer target = target_list[i];
@@ -205,7 +206,6 @@ void ddcrp_iterate(
                 continue;
             }
             // table join
-            auto source_component = assignment.component(source);
             auto target_component = assignment.component(target);
             auto source_loglikehood = loglikelihood_func(source_component);
             auto target_loglikehood = loglikelihood_func(target_component);
