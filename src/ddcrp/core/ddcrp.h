@@ -5,14 +5,6 @@
 #ifndef DDCRP_DDCRP_H
 #define DDCRP_DDCRP_H
 
-#include <map>
-#include <vector>
-#include <set>
-#include <random>
-#include <list>
-#include "common.h"
-#include "math.h"
-#include "ds.h"
 #include "assignment.h"
 
 //template<typename UnitRNG>
