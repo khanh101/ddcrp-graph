@@ -44,7 +44,7 @@ private:
 
     uint64 m_num_customers;
     std::vector<Node> m_adjacency_list;
-    std::vector<Table> m_table_assignment;
+    std::vector<Table> m_customer2table;
     uint64 m_table_count;
 
     std::set<Customer> weakly_connected_component(Customer customer);
@@ -59,11 +59,11 @@ Assignment::Assignment(Customer num_customers) :
 //:param num_customers: number of customers
         m_num_customers(num_customers),
         m_adjacency_list(),
-        m_table_assignment(),
+        m_customer2table(),
         m_table_count(num_customers) {
     for (Customer customer = 0; customer < num_customers; customer++) {
         m_adjacency_list.emplace_back();
-        m_table_assignment.push_back(customer);
+        m_customer2table.push_back(customer);
     }
 }
 
@@ -110,7 +110,7 @@ void Assignment::unlink(Customer source) {
     auto new_source_table = m_table_count;
     m_table_count++;
     for (auto new_source_customer: new_source_component) {
-        m_table_assignment[new_source_customer] = new_source_table;
+        m_customer2table[new_source_customer] = new_source_table;
     }
 }
 
@@ -118,13 +118,13 @@ void Assignment::link(Customer source, Customer target) {
     // add link
     m_adjacency_list[source].m_parent = target;
     m_adjacency_list[target].m_children.insert(source);
-    if (m_table_assignment[source] != m_table_assignment[target]) {
+    if (m_customer2table[source] != m_customer2table[target]) {
         // update assingment
         auto new_join_table = m_table_count;
         m_table_count += 1;
         auto new_join_component = weakly_connected_component(source);
         for (auto new_join_customer: new_join_component) {
-            m_table_assignment[new_join_customer] = new_join_table;
+            m_customer2table[new_join_customer] = new_join_table;
         }
     }
 }
@@ -134,15 +134,15 @@ Customer Assignment::num_customers() const {
 }
 
 Table Assignment::table(Customer customer) const {
-    return m_table_assignment[customer];
+    return m_customer2table[customer];
 }
 
 std::vector<Customer> Assignment::component(Customer customer) const {
-    auto table = m_table_assignment[customer];
+    auto table = m_customer2table[customer];
     auto component = std::vector<Customer>();
     component.reserve(m_num_customers);
     for (Customer c_customer=0; c_customer < m_num_customers; c_customer++) {
-        if (m_table_assignment[c_customer] == table) {
+        if (m_customer2table[c_customer] == table) {
             component.push_back(c_customer);
         }
     }
@@ -150,7 +150,7 @@ std::vector<Customer> Assignment::component(Customer customer) const {
 }
 
 std::vector<Table> Assignment::table_assignment() const {
-    return std::vector<Table>(m_table_assignment);
+    return std::vector<Table>(m_customer2table);
 }
 
 
