@@ -7,7 +7,6 @@
 
 #include <set>
 #include "common.h"
-#include "ds.h"
 
 using Customer = uint64;
 using Table = uint64;
@@ -36,7 +35,7 @@ public:
 private:
     struct Node {
         Customer m_parent;
-        ds::small_set<Customer, customer_nil> m_children;
+        std::set<Customer> m_children;
 
         Node();
 
@@ -87,12 +86,12 @@ std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
         auto node = m_adjacency_list[current];
         auto adding = node.m_children;
         adding.insert(node.m_parent);
-        adding.foreach([&](Customer new_customer) {
+        for (auto new_customer: adding) {
             if (new_customer != customer_nil and not is_in_list(frontier, new_customer) and
-                not (visited.find(new_customer) != visited.end())) {
+                not(visited.find(new_customer) != visited.end())) {
                 frontier.push_back(new_customer);
             }
-        });
+        };
     }
     return visited;
 }
