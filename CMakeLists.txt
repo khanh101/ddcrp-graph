@@ -9,7 +9,7 @@ add_library(ddcrp SHARED
         src/ddcrp/core/common.h
         src/ddcrp/core/prior.h
         src/ddcrp/core/ddcrp.h
-        )
+        src/ddcrp/core/ds.h)
 
 add_executable(main main.cpp)
 

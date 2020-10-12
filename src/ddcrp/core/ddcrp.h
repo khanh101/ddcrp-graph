@@ -12,6 +12,7 @@
 #include <list>
 #include "common.h"
 #include "math.h"
+#include "ds.h"
 
 using Customer = uint64;
 using Table = uint64;
@@ -40,7 +41,7 @@ public:
 private:
     struct Node {
         Customer m_parent;
-        std::list<Customer> m_children;
+        ds::small_set<Customer, customer_nil> m_children;
 
         Node();
 
@@ -99,13 +100,13 @@ std::set<Customer> Assignment::weakly_connected_component(Customer customer) {
         visited.insert(current);
         auto node = m_adjacency_list[current];
         auto adding = node.m_children;
-        adding.push_back(node.m_parent);
-        for (Customer new_customer: adding) {
+        adding.insert(node.m_parent);
+        adding.foreach([&](Customer new_customer) {
             if (new_customer != customer_nil and not is_in_list(frontier, new_customer) and
                 not (visited.find(new_customer) != visited.end())) {
                 frontier.push_back(new_customer);
             }
-        }
+        });
     }
     return visited;
 }
@@ -117,8 +118,7 @@ void Assignment::unlink(Customer source) {
     }
     // remove link
 
-    auto& children = m_adjacency_list[target].m_children;
-    children.erase(std::find(children.begin(), children.end(), source));
+    m_adjacency_list[target].m_children.erase(source);
     m_adjacency_list[source].m_parent = customer_nil;
     // update assingment
     auto new_source_component = weakly_connected_component(source);
@@ -132,7 +132,7 @@ void Assignment::unlink(Customer source) {
 void Assignment::link(Customer source, Customer target) {
     // add link
     m_adjacency_list[source].m_parent = target;
-    m_adjacency_list[target].m_children.push_back(source);
+    m_adjacency_list[target].m_children.insert(source);
     if (m_table_assignment[source] != m_table_assignment[target]) {
         // update assingment
         auto new_join_table = m_table_count;
