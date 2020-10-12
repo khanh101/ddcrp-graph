@@ -16,7 +16,7 @@ using float64 = double;
 using uint64 = unsigned long;
 using int64 = long;
 
-uint64 uint64_nil = -1;
+const uint64 uint64_nil = -1;
 
 using vector = Eigen::Matrix<float64, Eigen::Dynamic, 1>;
 using matrix = Eigen::Matrix<float64, Eigen::Dynamic, Eigen::Dynamic>;

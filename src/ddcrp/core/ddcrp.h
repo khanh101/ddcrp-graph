@@ -17,8 +17,8 @@
 using Customer = uint64;
 using Table = uint64;
 
-const Customer customer_nil = -1;
-const Table table_nil = -1;
+const Customer customer_nil = uint64_nil;
+const Table table_nil = uint64_nil;
 
 class Assignment {
 public:
