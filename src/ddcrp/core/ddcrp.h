@@ -25,6 +25,7 @@ void ddcrp_iterate(
                 Customer)> &logdecay_func, // logdecay = logdecay_func[customer1][customer2]
         const std::function<float64(const std::vector<Customer> &)> &loglikelihood_func // loglikelihood of a compoentn
 ) {
+    assignment.set_loglikelihood_func(loglikelihood_func);
     auto target_list = std::vector<Customer>();
     auto logweight_list = std::vector<float64>();
     target_list.reserve(assignment.num_customers());
@@ -58,15 +59,15 @@ void ddcrp_iterate(
             }
             // table join
             auto target_component = assignment.component(target);
-            auto source_loglikehood = loglikelihood_func(source_component);
-            auto target_loglikehood = loglikelihood_func(target_component);
+            auto source_loglikelihood = assignment.loglikelihood(source);
+            auto target_loglikelihood = assignment.loglikelihood(target);
             auto join_component = std::vector<Customer>();
             join_component.reserve(source_component.size() + target_component.size());
             join_component.insert(join_component.end(), source_component.begin(), source_component.end());
             join_component.insert(join_component.end(), target_component.begin(), target_component.end());
-            auto join_loglikehood = loglikelihood_func(join_component);
+            auto join_loglikelihood = loglikelihood_func(join_component);
             //std::cout << join_loglikehood << " " << source_loglikehood << " " << target_loglikehood << std::endl;
-            logweight_list[i] = logdecay + join_loglikehood - source_loglikehood - target_loglikehood;
+            logweight_list[i] = logdecay + join_loglikelihood - source_loglikelihood - target_loglikelihood;
             // update source component
         }
         float64 max_logweight = logweight_list[0];

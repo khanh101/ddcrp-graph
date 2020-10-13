@@ -16,10 +16,11 @@ const Table table_nil = uint64_nil;
 
 class Assignment {
 public:
-    explicit Assignment(Customer num_customers,
-                        std::function<float64(const std::vector<Customer> &)> loglikelihoodFunc);
+    explicit Assignment(Customer num_customers);
 
     ~Assignment() = default;
+
+    void set_loglikelihood_func(std::function<float64(const std::vector<Customer>&)> loglikelihood_func);
 
     void unlink(Customer source);
 
@@ -32,6 +33,8 @@ public:
     [[nodiscard]] std::vector<Customer> component(Customer customer) const;
 
     [[nodiscard]] std::vector<Table> table_assignment() const;
+    float64 loglikelihood(Customer source) const;
+
 
 private:
     struct Node {
@@ -47,7 +50,7 @@ private:
     std::vector<Node> m_adjacency_list;
     std::vector<Table> m_customer2table;
     std::map<Table, std::set<Customer>> m_table2customer;
-    std::map<Table, float> m_table2loglikelihood;
+    std::map<Table, float64> m_table2loglikelihood;
     uint64 m_table_count;
     std::function<float64(const std::vector<Customer> &)> m_loglikelihood_func; // loglikelihood of a compoentn
 
@@ -58,8 +61,7 @@ private:
 Assignment::Node::Node() :
         m_parent(customer_nil), m_children() {}
 
-Assignment::Assignment(Customer num_customers,
-                       std::function<float64(const std::vector<Customer> &)> loglikelihood_func) :
+Assignment::Assignment(Customer num_customers) :
 //init default, each customer sits in one table
 //:param num_customers: number of customers
         m_num_customers(num_customers),
@@ -68,12 +70,15 @@ Assignment::Assignment(Customer num_customers,
         m_table2customer(),
         m_table2loglikelihood(),
         m_table_count(num_customers),
-        m_loglikelihood_func(loglikelihood_func) {
+        m_loglikelihood_func([](const std::vector<Customer>&) -> float64 {
+            return 0;
+        })
+        {
     for (Customer customer = 0; customer < num_customers; customer++) {
         m_adjacency_list.emplace_back();
         m_customer2table.push_back(customer);
         m_table2customer.emplace(customer, std::set<Customer>({customer}));
-        m_table2loglikelihood.emplace(customer, loglikelihood_func(std::vector<Customer>({customer})));
+        m_table2loglikelihood.emplace(customer, 0);
     }
 }
 
@@ -182,6 +187,19 @@ std::vector<Customer> Assignment::component(Customer customer) const {
 
 std::vector<Table> Assignment::table_assignment() const {
     return std::vector<Table>(m_customer2table);
+}
+
+void Assignment::set_loglikelihood_func(std::function<float64(const std::vector<Customer>&)> loglikelihood_func) {
+    m_loglikelihood_func = loglikelihood_func;
+    for (auto it = m_table2customer.begin(); it != m_table2customer.end(); it++) {
+        Table table = it->first;
+        auto component = it->second;
+        m_table2loglikelihood[table] = m_loglikelihood_func(std::vector<Customer>(component.begin(), component.end()));
+    }
+}
+
+float64 Assignment::loglikelihood(Customer source) const {
+    return m_table2loglikelihood.find(m_customer2table[source])->second;
 }
 
 
