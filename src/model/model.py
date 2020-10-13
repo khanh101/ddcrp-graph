@@ -9,6 +9,7 @@ from src.deepwalk.deepwalk import DeepWalk
 from src.deepwalk.walk import random_walk
 from src.draw import draw_size
 from src.kmeans.kmeans import kmeans_improve
+from src.logger import log
 from src.mcla.mcla import mcla
 from src.util import receptive_field, label_to_comm
 
@@ -66,7 +67,7 @@ class Model(object):
             ddcrp_logalpha,
             adj,
         )
-        print(f"ddcrp time: {time.time() - t0}")
+        log.write_log(f"ddcrp time: {time.time() - t0}")
         comm_list = []
         for label in label_list:
             comm_list.extend(label_to_comm(label))
