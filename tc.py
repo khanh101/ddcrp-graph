@@ -2,11 +2,10 @@
 import networkx as nx
 import numpy as np
 
-from src.draw import draw_size, draw_mat
-from graph.sbm import sbm, preferential_attachment_cluster
+from src.draw import draw_size
+from src.graph.sbm import sbm, preferential_attachment_cluster
 from src.logger import log
 from src.model.model import Model
-from src.util import comm_to_label, similarity_matrix
 
 seed = 1234
 np.random.seed(seed)
