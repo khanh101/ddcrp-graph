@@ -27,8 +27,14 @@ for hop in [1, 2]:
         for scale in range(1000, 10001, 1000):
             start = 0
             model = Model(seed, mg.number_of_nodes(), dim)
+            end_loop = False
             while True:
+                if end_loop:
+                    break
                 end = start + window * fold_size
+                if end >= len(edge_list):
+                    end = len(edge_list) - 1
+                    end_loop = True
                 #####
                 g = subgraph_by_timestamp(
                     mg,
@@ -45,7 +51,7 @@ for hop in [1, 2]:
                 log.write_log(f"cluster size {len(kmeans_improved_comm)} kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improved_comm)}")
                 log.write_log(f"cluster size {len(kmeans_comm)} kmeans naive    modularity: {nx.algorithms.community.quality.modularity(g, kmeans_comm)}")
 
-            #####
-            start += fold_size
+                #####
+                start += fold_size
 
 pass
