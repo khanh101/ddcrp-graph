@@ -21,26 +21,26 @@ window = 10
 dim = 50
 
 fold_size = int(len(edge_list) / num_folds)
-start = 0
 
-model = Model(seed, mg.number_of_nodes(), dim)
-while True:
-     end = start + window * fold_size
-     #####
-     log.write_log(f"{start} -> {end}")
-     g = subgraph_by_timestamp(
-          mg,
-          timestamp(edge_list[start]),
-          timestamp(edge_list[end]),
-     )
-     embedding = model.deepwalk_embedding(g)
-     scale = 5000
-     comm, kmeans_improved_comm, kmeans_comm = Model(seed, g.number_of_nodes(), dim).ddcrp_iterate(g, embedding, ddcrp_scale=scale)
-     log.write_log(f"scale {scale}")
-     log.write_log(f"cluster size {len(kmeans_improved_comm)} kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improved_comm)}")
-     log.write_log(f"cluster size {len(kmeans_comm)} kmeans naive    modularity: {nx.algorithms.community.quality.modularity(g, kmeans_comm)}")
+for scale in range(1000, 10001, 1000):
+     start = 0
+     model = Model(seed, mg.number_of_nodes(), dim)
+     while True:
+          end = start + window * fold_size
+          #####
+          log.write_log(f"{start} -> {end}")
+          g = subgraph_by_timestamp(
+               mg,
+               timestamp(edge_list[start]),
+               timestamp(edge_list[end]),
+          )
+          embedding = model.deepwalk_embedding(g)
+          comm, kmeans_improved_comm, kmeans_comm = Model(seed, g.number_of_nodes(), dim).ddcrp_iterate(g, embedding, ddcrp_scale=scale)
+          log.write_log(f"scale {scale}")
+          log.write_log(f"cluster size {len(kmeans_improved_comm)} kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improved_comm)}")
+          log.write_log(f"cluster size {len(kmeans_comm)} kmeans naive    modularity: {nx.algorithms.community.quality.modularity(g, kmeans_comm)}")
 
-     #####
-     start += fold_size
+          #####
+          start += fold_size
 
 pass
