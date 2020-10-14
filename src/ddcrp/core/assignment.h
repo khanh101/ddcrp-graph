@@ -28,11 +28,14 @@ public:
 
     [[nodiscard]] Customer num_customers() const;
 
+    [[nodiscard]] Table num_tables() const;
+
     [[nodiscard]] Table table(Customer customer) const;
 
     [[nodiscard]] std::vector<Customer> component(Customer customer) const;
 
-    [[nodiscard]] std::vector<Table> table_assignment() const;
+    [[nodiscard]] std::vector<Table> customer2table() const;
+
     float64 loglikelihood(Customer source) const;
 
 
@@ -176,6 +179,10 @@ Customer Assignment::num_customers() const {
     return m_num_customers;
 }
 
+Customer Assignment::num_tables() const {
+    return m_table2customer.size();
+}
+
 Table Assignment::table(Customer customer) const {
     return m_customer2table[customer];
 }
@@ -185,12 +192,11 @@ std::vector<Customer> Assignment::component(Customer customer) const {
     return std::vector<Customer>(component.begin(), component.end());
 }
 
-std::vector<Table> Assignment::table_assignment() const {
+std::vector<Table> Assignment::customer2table() const {
     return std::vector<Table>(m_customer2table);
 }
 
 void Assignment::set_loglikelihood_func(std::function<float64(const std::vector<Customer>&)> loglikelihood_func) {
-	std::cout << "recalculating loglikelihood of "<< m_table2loglikelihood.size() <<" tables" << std::endl;
     m_loglikelihood_func = loglikelihood_func;
     for (auto it = m_table2customer.begin(); it != m_table2customer.end(); it++) {
         Table table = it->first;
