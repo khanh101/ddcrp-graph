@@ -76,6 +76,7 @@ void iterate_state(
 
     auto result = std::vector<uint64>();
     for (uint64 iter = 0; iter < num_iterations; iter++) {
+        std::cout << "iter: " << iter+1 << "/" << num_iterations <<": number of tables " <<  << std:: endl;
         ddcrp_iterate(
                 gen,
                 ddcrp,
@@ -85,7 +86,6 @@ void iterate_state(
         );
         auto table = ddcrp.table_assignment();
         result.insert(result.end(), table.begin(), table.end());
-        std::cout << "iter: " << iter+1 << "/" << num_iterations << std:: endl;
     }
     // result
     std::memcpy(cluster_assignment, result.data(), result.size() * sizeof(uint64));

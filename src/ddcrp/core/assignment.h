@@ -190,6 +190,7 @@ std::vector<Table> Assignment::table_assignment() const {
 }
 
 void Assignment::set_loglikelihood_func(std::function<float64(const std::vector<Customer>&)> loglikelihood_func) {
+	std::cout << "recalculating loglikelihood of "<< m_table2loglikelihood.size() <<" tables" << std::endl;
     m_loglikelihood_func = loglikelihood_func;
     for (auto it = m_table2customer.begin(); it != m_table2customer.end(); it++) {
         Table table = it->first;
