@@ -5,7 +5,7 @@ import networkx as nx
 from src.graph.data import load_data
 from src.logger import log
 from src.model.model import Model
-from src.util import subgraph_by_timestamp
+from src.util import subgraph_by_timestamp, set_intersection, set_difference, set_union
 
 seed = 1234
 
@@ -44,14 +44,43 @@ for hop in [1, 2]:
                 )
                 embedding = model.deepwalk(g)
                 comm_list = model.ddcrp(g, embedding, ddcrp_scale=scale, receptive_hop=hop)
-                comm, mapping = model.mcla(comm_list, comm)
+                naive_comm, mapping = model.mcla(comm_list[5:], comm)
+                new_comm = model.kmeans(embedding, naive_comm)
+                for i, c in enumerate(mapping):
+                    if len(c) == 0:
+                        log.write_log(f"new comm")
+                        join = new_comm[i]
+                        log.write_log(f"\tjoin:  {len(join)} {join}")
+                    elif len(c) == 1:
+                        log.write_log(f"old comm:")
+                        intersection = set_intersection([comm[i], new_comm[i]])
+                        leave = set_difference(comm[i], new_comm[i])
+                        join =  set_difference(new_comm[i], comm[i])
+                        log.write_log(f"\tinter: {len(intersection)} {intersection}")
+                        log.write_log(f"\tleave: {len(leave)} {leave}")
+                        log.write_log(f"\tjoin:  {len(join)} {join}")
+                    else:
+                        new = new_comm[i]
+                        log.write_log(f"join comm:")
+                        intersection =set_intersection([set_union([comm[i] for i in c]), new_comm[i]])
+                        leave =  set_difference(set_union([comm[i] for i in c]), new_comm[i])
+                        join = set_difference(new_comm[i], set_union([comm[i] for i in c]))
+                        log.write_log(f"\tinter: {len(intersection)} {intersection}")
+                        log.write_log(f"\tleave: {len(leave)} {leave}")
+                        log.write_log(f"\tjoin:  {len(join)} {join}")
+
+
                 log.write_log(f"range: {start} -> {end}")
                 log.write_log(f"window: {window}")
                 log.write_log(f"scale {scale}")
                 log.write_log(f"hop {hop}")
                 log.write_log(f"{mapping}")
+                log.write_log(f"modularity {nx.algorithms.community.quality.modularity(g, naive_comm)}")
+                log.write_log(f"modularity {nx.algorithms.community.quality.modularity(g, new_comm)}")
+                log.write_log(f"modularity {nx.algorithms.community.quality.modularity(g, model.kmeans(embedding, len(naive_comm)))}")
 
                 #####
                 start += fold_size
+                comm = new_comm
 
 pass

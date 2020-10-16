@@ -74,3 +74,27 @@ def linear_regression(X: np.ndarray, y: np.array) -> Tuple[np.ndarray, np.ndarra
     model: sklearn.linear_model.LinearRegression = sklearn.linear_model.LinearRegression()
     model.fit(X, y)
     return model.coef_.T, model.intercept_
+
+def set_union(s: List[Set[int]]):
+    out = set()
+    for ss in s:
+        for i in ss:
+            out.add(i)
+    return out
+def set_intersection(s: List[Set[int]]):
+    out = set()
+    for i in s[0]:
+        intersection = True
+        for ss in s[1:]:
+            if i not in ss:
+                intersection = False
+                break
+        if intersection:
+            out.add(i)
+    return out
+def set_difference(a: Set[int], b: Set[int]):
+    out = set()
+    for i in a:
+        if i not in b:
+            out.add(i)
+    return out
