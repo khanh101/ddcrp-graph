@@ -74,7 +74,7 @@ class Model(object):
         return comm_list
 
     @staticmethod
-    def mcla(comm_list: List[List[Set[int]]], reference: Dict[int, Set[int]]) -> Tuple[List[Set[int]], List[Set[int]]]:
+    def mcla(comm_list: List[List[Set[int]]], reference: List[Set[int]]) -> Tuple[List[Set[int]], List[Set[int]]]:
         # mcla
         next_comm: List[Set[int]] = []
         for comm in comm_list:

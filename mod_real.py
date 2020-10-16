@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Set
 
 import networkx as nx
 
@@ -28,6 +28,7 @@ for hop in [1, 2]:
             start = 0
             model = Model(seed, mg.number_of_nodes(), dim)
             end_loop = False
+            comm: List[Set[int]] = []
             while True:
                 if end_loop:
                     break
@@ -41,15 +42,14 @@ for hop in [1, 2]:
                     timestamp(edge_list[start]),
                     timestamp(edge_list[end]),
                 )
-                embedding = model.deepwalk_embedding(g)
-                comm, kmeans_improved_comm, kmeans_comm = model.ddcrp_iterate(g, embedding, ddcrp_scale=scale,
-                                                                          receptive_hop=hop)
+                embedding = model.deepwalk(g)
+                comm_list = model.ddcrp(g, embedding, ddcrp_scale=scale, receptive_hop=hop)
+                comm, mapping = model.mcla(comm_list, comm)
                 log.write_log(f"range: {start} -> {end}")
                 log.write_log(f"window: {window}")
                 log.write_log(f"scale {scale}")
                 log.write_log(f"hop {hop}")
-                log.write_log(f"cluster size {len(kmeans_improved_comm)} kmeans improved modularity: {nx.algorithms.community.quality.modularity(g, kmeans_improved_comm)}")
-                log.write_log(f"cluster size {len(kmeans_comm)} kmeans naive    modularity: {nx.algorithms.community.quality.modularity(g, kmeans_comm)}")
+                log.write_log(f"{mapping}")
 
                 #####
                 start += fold_size
