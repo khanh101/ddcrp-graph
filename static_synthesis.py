@@ -19,9 +19,9 @@ dim = 50
 deepwalk_epochs = 10
 ddcrp_iterations = 10
 ddcrp_cutoff = 5
-log.write_csv(["graph size", "average deree", "cluster size", "max modularity", "max performance", "scale", "predicted cluster size", "improved modularity", "improved performance", "naive modularity", "naive performance", "ddcrp time"])
-def write_line(graph_size: int, average_degree: float, cluster_size: int, max_modularity: float, max_performance: float, scale: float, predicted_cluster_size: int, improved_modularity: float, improved_performance: float, naive_modularity: float, naive_performance: float, ddcrp_time: float):
-    log.write_csv([graph_size, average_degree, cluster_size, max_modularity, max_performance, scale, predicted_cluster_size, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time])
+log.write_csv(["graph size", "average deree", "cluster size", "max modularity", "max performance", "scale", "predicted cluster size", "modularity", "performance", "improved modularity", "improved performance", "naive modularity", "naive performance", "ddcrp time"])
+def write_line(graph_size: int, average_degree: float, cluster_size: int, max_modularity: float, max_performance: float, scale: float, predicted_cluster_size: int, modularity: float, performance: float, improved_modularity: float, improved_performance: float, naive_modularity: float, naive_performance: float, ddcrp_time: float):
+    log.write_csv([graph_size, average_degree, cluster_size, max_modularity, max_performance, scale, predicted_cluster_size, modularity, performance, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time])
 for approx_avg_degree in range(10, 51, 10):
     for approx_num_nodes in range(500, 2001, 500):
         g, actual_comm = sbm(preferential_attachment_cluster(num_clusters, gamma), approx_num_nodes, approx_avg_degree)
@@ -38,10 +38,12 @@ for approx_avg_degree in range(10, 51, 10):
             comm_list = comm_list[ddcrp_cutoff:]
             comm, _ = Model.mcla(comm_list)
             predicted_cluster_size = len(comm)
+            modularity = nx.algorithms.community.quality.modularity(g, comm)
+            performance = nx.algorithms.community.quality.performance(g, comm)
             improved_comm = Model.kmeans(embedding, comm)
             improved_modularity = nx.algorithms.community.quality.modularity(g, improved_comm)
             improved_performance = nx.algorithms.community.quality.performance(g, improved_comm)
             naive_comm = Model.kmeans(embedding, len(comm))
             naive_modularity = nx.algorithms.community.quality.modularity(g, naive_comm)
             naive_performance = nx.algorithms.community.quality.performance(g, naive_comm)
-            write_line(graph_size, average_degree, cluster_size, max_modularity, max_performance, scale, predicted_cluster_size, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time)
+            write_line(graph_size, average_degree, cluster_size, max_modularity, max_performance, scale, predicted_cluster_size, modularity, performance, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time)
