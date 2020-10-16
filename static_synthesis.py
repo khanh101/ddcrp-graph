@@ -16,6 +16,9 @@ num_clusters = 50
 gamma = 2.5
 # model
 dim = 50
+deepwalk_epochs = 10
+ddcrp_iterations = 10
+ddcrp_cutoff = 5
 log.write_csv(["graph size", "average deree", "cluster size", "max modularity", "max performance", "scale", "predicted cluster size", "improved modularity", "improved performance", "naive modularity", "naive performance", "ddcrp time"])
 def write_line(graph_size: int, average_degree: float, cluster_size: int, max_modularity: float, max_performance: float, scale: float, predicted_cluster_size: int, improved_modularity: float, improved_performance: float, naive_modularity: float, naive_performance: float, ddcrp_time: float):
     log.write_csv([graph_size, average_degree, cluster_size, max_modularity, max_performance, scale, predicted_cluster_size, improved_modularity, improved_performance, naive_modularity, naive_performance])
@@ -27,10 +30,11 @@ for approx_avg_degree in range(10, 51, 10):
         cluster_size = len(actual_comm)
         max_modularity = nx.algorithms.community.quality.modularity(g, actual_comm)
         max_performance = nx.algorithms.community.quality.performance(g, actual_comm)
-        embedding = Model(seed, g.number_of_nodes(), dim).deepwalk(g)
+        embedding = Model(seed, g.number_of_nodes(), dim).deepwalk(g, deepwalk_epochs)
         for scale in range(1000, 30000, 1000):
             t0 = time.time()
-            comm_list = Model(seed, g.number_of_nodes(), dim).ddcrp(g, embedding, ddcrp_scale=scale)
+            comm_list = Model(seed, g.number_of_nodes(), dim).ddcrp(g, embedding, ddcrp_scale=scale, ddcrp_iterations=ddcrp_iterations)
+            comm_list = comm_list[ddcrp_cutoff:]
             ddcrp_time = time.time() - t0
             comm, _ = Model.mcla(comm_list)
             predicted_cluster_size = len(comm)
