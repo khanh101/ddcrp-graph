@@ -60,21 +60,19 @@ class Model(object):
             return data
 
         adj.data = distance(ddcrp_scale)
-        t0 = time.time()
         label_list = self._ddcrp.iterate(
             ddcrp_iterations,
             embedding,
             ddcrp_logalpha,
             adj,
         )
-        log.write_log(f"ddcrp time: {time.time() - t0}")
         comm_list = []
         for label in label_list:
             comm_list.append(label_to_comm(label))
         return comm_list
 
     @staticmethod
-    def mcla(comm_list: List[List[Set[int]]], reference: List[Set[int]]) -> Tuple[List[Set[int]], List[Set[int]]]:
+    def mcla(comm_list: List[List[Set[int]]], reference: List[Set[int]] = None) -> Tuple[List[Set[int]], List[Set[int]]]:
         # mcla
         next_comm: List[Set[int]] = []
         for comm in comm_list:

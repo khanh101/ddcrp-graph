@@ -1,5 +1,6 @@
 import datetime
 import os
+from typing import List
 
 log_folder = "./log"
 
@@ -25,6 +26,9 @@ class Log(object):
 
     def write_log(self, data: str, name: str="default"):
         self.write(f"{datetime.datetime.now()}: {data}", name)
+
+    def write_csv(self, data: List, name: str="default"):
+        self.write(",".join(map(lambda item: str(item), data)), name)
 
 # default log
 log = Log()
