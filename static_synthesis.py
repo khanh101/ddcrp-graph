@@ -21,7 +21,7 @@ ddcrp_iterations = 10
 ddcrp_cutoff = 5
 log.write_csv(["graph size", "average deree", "cluster size", "max modularity", "max performance", "scale", "predicted cluster size", "improved modularity", "improved performance", "naive modularity", "naive performance", "ddcrp time"])
 def write_line(graph_size: int, average_degree: float, cluster_size: int, max_modularity: float, max_performance: float, scale: float, predicted_cluster_size: int, improved_modularity: float, improved_performance: float, naive_modularity: float, naive_performance: float, ddcrp_time: float):
-    log.write_csv([graph_size, average_degree, cluster_size, max_modularity, max_performance, scale, predicted_cluster_size, improved_modularity, improved_performance, naive_modularity, naive_performance])
+    log.write_csv([graph_size, average_degree, cluster_size, max_modularity, max_performance, scale, predicted_cluster_size, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time])
 for approx_avg_degree in range(10, 51, 10):
     for approx_num_nodes in range(500, 2001, 500):
         g, actual_comm = sbm(preferential_attachment_cluster(num_clusters, gamma), approx_num_nodes, approx_avg_degree)
@@ -34,8 +34,8 @@ for approx_avg_degree in range(10, 51, 10):
         for scale in range(1000, 30000, 1000):
             t0 = time.time()
             comm_list = Model(seed, g.number_of_nodes(), dim).ddcrp(g, embedding, ddcrp_scale=scale, ddcrp_iterations=ddcrp_iterations)
-            comm_list = comm_list[ddcrp_cutoff:]
             ddcrp_time = time.time() - t0
+            comm_list = comm_list[ddcrp_cutoff:]
             comm, _ = Model.mcla(comm_list)
             predicted_cluster_size = len(comm)
             improved_comm = Model.kmeans(embedding, comm)
