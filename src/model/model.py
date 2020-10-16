@@ -1,5 +1,5 @@
 import time
-from typing import List, Set, Any
+from typing import List, Set, Any, Dict, Tuple, Union
 
 import numpy as np
 import networkx as nx
@@ -15,32 +15,32 @@ from src.util import receptive_field, label_to_comm
 
 
 class Model(object):
-    deepwalk: DeepWalk
-    ddcrp: DDCRP
-    context: int
+    _deepwalk: DeepWalk
+    _ddcrp: DDCRP
+    _context: int
     def __init__(self, seed: int, num_nodes: int, dim: int, context: int = 5):
         super(Model, self).__init__()
-        self.deepwalk = DeepWalk(dim, context)
-        self.ddcrp = DDCRP(seed, num_nodes, dim)
-        self.context = context
+        self._deepwalk = DeepWalk(dim, context)
+        self._ddcrp = DDCRP(seed, num_nodes, dim)
+        self._context = context
 
-    def deepwalk_embedding(
+    def deepwalk(
             self,
             g: nx.Graph,
             deepwalk_epochs: int=10,
     ) -> np.ndarray:
         # deepwalk
         walks_per_node: int = int(2 * g.number_of_edges() / g.number_of_nodes())
-        walk_length: int = 3 * self.context
+        walk_length: int = 3 * self._context
         walks = random_walk(g, walks_per_node, walk_length)
         t0 = time.time()
-        embedding = self.deepwalk.train(walks, deepwalk_epochs)
+        embedding = self._deepwalk.train(walks, deepwalk_epochs)
         print(f"deepwalk time: {time.time() - t0}s")
         embedding -= embedding.mean(axis=0)  # normalized
         embedding /= embedding.std(axis=0).mean()  # normalized
         return embedding
 
-    def ddcrp_iterate(
+    def ddcrp(
             self,
             g: nx.Graph,
             embedding: np.ndarray,
@@ -48,7 +48,7 @@ class Model(object):
             ddcrp_logalpha: float= -float("inf"),
             receptive_hop: int = 1,
             ddcrp_scale: float = 5000,
-    ) -> Any:
+    ) -> List[List[Set[int]]]:
         # ddcrp
         adj = receptive_field(g, receptive_hop)
 
@@ -61,7 +61,7 @@ class Model(object):
 
         adj.data = distance(ddcrp_scale)
         t0 = time.time()
-        label_list = self.ddcrp.iterate(
+        label_list = self._ddcrp.iterate(
             ddcrp_iterations,
             embedding,
             ddcrp_logalpha,
@@ -70,9 +70,18 @@ class Model(object):
         log.write_log(f"ddcrp time: {time.time() - t0}")
         comm_list = []
         for label in label_list:
-            comm_list.extend(label_to_comm(label))
+            comm_list.append(label_to_comm(label))
+        return comm_list
+
+    @staticmethod
+    def mcla(comm_list: List[List[Set[int]]], reference: Dict[int, Set[int]]) -> Tuple[List[Set[int]], List[Set[int]]]:
         # mcla
-        comm = mcla(comm_list)
-        kmeans_improved_comm = kmeans_improve(embedding, comm)
-        kmeans_comm = kmeans_improve(embedding, len(comm))
-        return comm, kmeans_improved_comm, kmeans_comm
+        next_comm: List[Set[int]] = []
+        for comm in comm_list:
+            next_comm.extend(comm)
+        comm, mapping = mcla(next_comm, reference)
+        return comm, mapping
+
+    @staticmethod
+    def kmeans(embedding: np.ndarray, init_comm: Union[int, List[Set[int]]]) -> List[Set[int]]:
+        return kmeans_improve(embedding, init_comm)
