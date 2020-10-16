@@ -23,7 +23,7 @@ def label_to_comm(label_list: np.ndarray) -> List[Set[int]]:
         if label not in communities:
             communities[label] = set()
         communities[label].add(node)
-    return list(communities.values())
+    return [v for _, v in sorted(communities.items(), key= lambda item: item[0])] # sort values by keys then return
 
 def subgraph_by_timestamp(mg: nx.MultiGraph, start: int, end: int) -> nx.Graph:
     edges = filter(
