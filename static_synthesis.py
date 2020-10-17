@@ -19,7 +19,7 @@ dim = 50
 deepwalk_epochs = 10
 ddcrp_iterations = 10
 ddcrp_cutoff = 5
-log.write_csv(["graph size", "average deree", "cluster size", "max modularity", "max performance", "scale", "predicted cluster size", "modularity", "performance", "improved modularity", "improved performance", "naive modularity", "naive performance", "ddcrp time"])
+log.write_csv(["graph size", "average degree", "cluster size", "max modularity", "max performance", "scale", "predicted cluster size", "modularity", "performance", "improved modularity", "improved performance", "naive modularity", "naive performance", "ddcrp time"])
 def write_line(graph_size: int, average_degree: float, cluster_size: int, max_modularity: float, max_performance: float, scale: float, predicted_cluster_size: int, modularity: float, performance: float, improved_modularity: float, improved_performance: float, naive_modularity: float, naive_performance: float, ddcrp_time: float):
     log.write_csv([graph_size, average_degree, cluster_size, max_modularity, max_performance, scale, predicted_cluster_size, modularity, performance, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time])
 for approx_avg_degree in range(10, 51, 10):
