@@ -69,30 +69,35 @@ for hop in [1, 2]:
                 comm_list = model.ddcrp(g, embedding, ddcrp_scale=scale, receptive_hop=hop)
                 ddcrp_time = time.time() - t0
                 comm_list = comm_list[ddcrp_cutoff:]
-                init_comm, mapping = model.mcla(comm_list[5:], comm)
+                init_comm, mapping = model.mcla(comm_list, comm)
                 predicted_cluster_size = len(init_comm)
                 new_comm = model.kmeans(embedding, init_comm)
                 def response(new_comm: List[Set[int]]) -> Any:
                     out = []
                     for i, c in enumerate(mapping):
                         if len(c) == 0:
+                            new = new_comm[i]
                             out.append({
                                 "type": "new",
-                                "join": list(new_comm[i]),
+                                "join": list(new),
                             })
                         elif len(c) == 1:
+                            old = comm[i]
+                            new = new_comm[i]
                             out.append({
                                 "type": "old",
-                                "remain": list(set_intersection([comm[i], new_comm[i]])),
-                                "leave": list(set_difference(comm[i], new_comm[i])),
-                                "join": list(set_difference(new_comm[i], comm[i])),
+                                "remain": list(set_intersection([old, new])),
+                                "leave": list(set_difference(old, new)),
+                                "join": list(set_difference(new, old)),
                             })
                         else:
+                            old = set_union([comm[i] for i in c])
+                            new = new_comm[i]
                             out.append({
                                 "type": "join",
-                                "remain": list(set_intersection([set_union([comm[i] for i in c]), new_comm[i]])),
-                                "leave": list(set_difference(set_union([comm[i] for i in c]), new_comm[i])),
-                                "join": list(set_difference(new_comm[i], set_union([comm[i] for i in c]))),
+                                "remain": list(set_intersection([old, new])),
+                                "leave": list(set_difference(old, new)),
+                                "join": list(set_difference(new, old)),
                             })
                     return out
 
