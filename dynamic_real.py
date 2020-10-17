@@ -39,81 +39,81 @@ def write_line(hop: int, window: int, scale: float, from_timestamp: int, to_time
         data=[from_timestamp, to_timestamp, average_degree, predicted_cluster_size, modularity, performance, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time, response],
         name=log_filename(hop, window, scale),
     )
+hop = 1
+window = 10
+scale = 3000
 
-for hop in [1, 2]:
-    for window in range(10, 51, 10):
-        for scale in range(1000, 10001, 1000):
-            write_first_line(hop, window, scale)
-            start = 0
-            model = Model(seed, mg.number_of_nodes(), dim)
-            end_loop = False
-            comm: List[Set[int]] = []
-            while True:
-                if end_loop:
-                    break
-                end = start + window * fold_size
-                if end >= len(edge_list):
-                    end = len(edge_list) - 1
-                    end_loop = True
-                #####
-                from_timestamp = timestamp(edge_list[start])
-                to_timestamp = timestamp(edge_list[end])
-                g = subgraph_by_timestamp(
-                    mg,
-                    from_timestamp,
-                    to_timestamp,
-                )
-                average_degree = 2 * g.number_of_edges() / g.number_of_nodes()
-                embedding = model.deepwalk(g)
-                t0 = time.time()
-                comm_list = model.ddcrp(g, embedding, ddcrp_scale=scale, receptive_hop=hop)
-                ddcrp_time = time.time() - t0
-                comm_list = comm_list[ddcrp_cutoff:]
-                init_comm, mapping = model.mcla(comm_list, comm)
-                predicted_cluster_size = len(init_comm)
-                new_comm = model.kmeans(embedding, init_comm)
-                def response(new_comm: List[Set[int]]) -> Any:
-                    out = []
-                    for i, c in enumerate(mapping):
-                        if len(c) == 0:
-                            new = new_comm[i]
-                            out.append({
-                                "type": "new",
-                                "join": list(new),
-                            })
-                        elif len(c) == 1:
-                            old = comm[i]
-                            new = new_comm[i]
-                            out.append({
-                                "type": "old",
-                                "remain": list(set_intersection([old, new])),
-                                "leave": list(set_difference(old, new)),
-                                "join": list(set_difference(new, old)),
-                            })
-                        else:
-                            old = set_union([comm[i] for i in c])
-                            new = new_comm[i]
-                            out.append({
-                                "type": "join",
-                                "remain": list(set_intersection([old, new])),
-                                "leave": list(set_difference(old, new)),
-                                "join": list(set_difference(new, old)),
-                            })
-                    return out
+write_first_line(hop, window, scale)
+start = 0
+model = Model(seed, mg.number_of_nodes(), dim)
+end_loop = False
+comm: List[Set[int]] = []
+while True:
+    if end_loop:
+        break
+    end = start + window * fold_size
+    if end >= len(edge_list):
+        end = len(edge_list) - 1
+        end_loop = True
+    #####
+    from_timestamp = timestamp(edge_list[start])
+    to_timestamp = timestamp(edge_list[end])
+    g = subgraph_by_timestamp(
+        mg,
+        from_timestamp,
+        to_timestamp,
+    )
+    average_degree = 2 * g.number_of_edges() / g.number_of_nodes()
+    embedding = model.deepwalk(g)
+    t0 = time.time()
+    comm_list = model.ddcrp(g, embedding, ddcrp_scale=scale, receptive_hop=hop)
+    ddcrp_time = time.time() - t0
+    comm_list = comm_list[ddcrp_cutoff:]
+    init_comm, mapping = model.mcla(comm_list, comm)
+    predicted_cluster_size = len(init_comm)
+    new_comm = model.kmeans(embedding, init_comm)
+    def response(new_comm: List[Set[int]]) -> Any:
+        out = []
+        for i, c in enumerate(mapping):
+            if len(c) == 0:
+                new = new_comm[i]
+                out.append({
+                    "type": "new",
+                    "join": list(new),
+                })
+            elif len(c) == 1:
+                old = comm[i]
+                new = new_comm[i]
+                out.append({
+                    "type": "old",
+                    "remain": list(set_intersection([old, new])),
+                    "leave": list(set_difference(old, new)),
+                    "join": list(set_difference(new, old)),
+                })
+            else:
+                old = set_union([comm[i] for i in c])
+                new = new_comm[i]
+                out.append({
+                    "type": "join",
+                    "remain": list(set_intersection([old, new])),
+                    "leave": list(set_difference(old, new)),
+                    "join": list(set_difference(new, old)),
+                })
+        return out
 
-                modularity = nx.algorithms.community.quality.modularity(g, init_comm)
-                performance = nx.algorithms.community.quality.performance(g, init_comm)
-                improved_modularity = nx.algorithms.community.quality.modularity(g, new_comm)
-                improved_performance = nx.algorithms.community.quality.performance(g, new_comm)
+    modularity = nx.algorithms.community.quality.modularity(g, init_comm)
+    performance = nx.algorithms.community.quality.performance(g, init_comm)
+    improved_modularity = nx.algorithms.community.quality.modularity(g, new_comm)
+    improved_performance = nx.algorithms.community.quality.performance(g, new_comm)
 
-                naive_comm = model.kmeans(embedding, len(init_comm))
-                naive_modularity = nx.algorithms.community.quality.modularity(g, naive_comm)
-                naive_performance = nx.algorithms.community.quality.performance(g, naive_comm)
+    naive_comm = model.kmeans(embedding, len(init_comm))
+    naive_modularity = nx.algorithms.community.quality.modularity(g, naive_comm)
+    naive_performance = nx.algorithms.community.quality.performance(g, naive_comm)
 
-                write_line(hop, window, scale, from_timestamp, to_timestamp, average_degree, predicted_cluster_size, modularity, performance, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time, response(new_comm))
+    write_line(hop, window, scale, from_timestamp, to_timestamp, average_degree, predicted_cluster_size, modularity, performance, improved_modularity, improved_performance, naive_modularity, naive_performance, ddcrp_time, response(new_comm))
 
-                #####
-                start += fold_size
-                comm = new_comm
+    #####
+    start += fold_size
+    comm = new_comm
 
 pass
