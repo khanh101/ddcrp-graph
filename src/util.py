@@ -1,11 +1,10 @@
-from typing import List, Set, Tuple
-
 import networkx as nx
 import numpy as np
 import scipy as sp
 import scipy.sparse
 import sklearn
 import sklearn.linear_model
+from typing import List, Set, Tuple
 
 
 def comm_to_label(comm: List[Set[int]]) -> np.ndarray:
@@ -23,7 +22,8 @@ def label_to_comm(label_list: np.ndarray) -> List[Set[int]]:
         if label not in communities:
             communities[label] = set()
         communities[label].add(node)
-    return [v for _, v in sorted(communities.items(), key= lambda item: item[0])] # sort values by keys then return
+    return [v for _, v in sorted(communities.items(), key=lambda item: item[0])]  # sort values by keys then return
+
 
 def subgraph_by_timestamp(mg: nx.MultiGraph, start: int, end: int) -> nx.Graph:
     edges = filter(
@@ -40,6 +40,7 @@ def subgraph_by_timestamp(mg: nx.MultiGraph, start: int, end: int) -> nx.Graph:
             g.add_edge(u, v, weight=data["weight"])
     return g
 
+
 def similarity_matrix(cluster_label_list: np.ndarray) -> np.ndarray:
     num_points = cluster_label_list.shape[1]
     count: np.ndarray = np.zeros((num_points, num_points), dtype=np.int)
@@ -52,7 +53,8 @@ def similarity_matrix(cluster_label_list: np.ndarray) -> np.ndarray:
     count = count / len(cluster_label_list)
     return count
 
-def receptive_field(g: nx.Graph, hop: int=1) -> sp.sparse.coo_matrix:
+
+def receptive_field(g: nx.Graph, hop: int = 1) -> sp.sparse.coo_matrix:
     a1 = nx.adjacency_matrix(g) + sp.sparse.identity(g.number_of_nodes())
     out = a1
     while hop > 1:
@@ -61,6 +63,7 @@ def receptive_field(g: nx.Graph, hop: int=1) -> sp.sparse.coo_matrix:
     out = sp.sparse.coo_matrix(out)
     out.data = out.data.astype(np.bool)
     return out
+
 
 def linear_regression(X: np.ndarray, y: np.array) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -75,12 +78,15 @@ def linear_regression(X: np.ndarray, y: np.array) -> Tuple[np.ndarray, np.ndarra
     model.fit(X, y)
     return model.coef_.T, model.intercept_
 
+
 def set_union(s: List[Set[int]]):
     out = set()
     for ss in s:
         for i in ss:
             out.add(i)
     return out
+
+
 def set_intersection(s: List[Set[int]]):
     out = set()
     for i in s[0]:
@@ -92,6 +98,8 @@ def set_intersection(s: List[Set[int]]):
         if intersection:
             out.add(i)
     return out
+
+
 def set_difference(a: Set[int], b: Set[int]):
     out = set()
     for i in a:

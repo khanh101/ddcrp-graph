@@ -9,6 +9,7 @@ def jaccard(set1: Set[int], set2: Set[int]) -> float:
             intersection.append(item)
     return len(intersection) / len(union)
 
+
 def jaccard_single(item: int, list: List[int]) -> float:
     occurrences = 0
     for item0 in list:

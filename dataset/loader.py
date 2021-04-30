@@ -1,6 +1,7 @@
 import io
 from typing import Iterator
 
+
 class Node(object):
     def __init__(self, index: int, name: str):
         self.index: int = index
@@ -20,6 +21,7 @@ class Edge(object):
 
     def __str__(self) -> str:
         return f"Edge{{index={self.index}: {self.source}->{self.target}: weight={self.weight}, timestamp={self.timestamp}}}"
+
 
 class Loader(object):
     def __init__(self, dataset_name: str = "email"):

@@ -15,7 +15,7 @@ class Log(object):
         self.folder = os.path.join(log_folder, f"log_{datetime.datetime.now()}")
         os.mkdir(self.folder)
 
-    def write(self, data: str, name: str="default"):
+    def write(self, data: str, name: str = "default"):
         filepath = os.path.join(self.folder, f"{name}.log")
         if not os.path.isfile(filepath):
             with open(filepath, "w") as _:
@@ -24,11 +24,12 @@ class Log(object):
             fp.write(f"{data}\n")
             print(f"{data}\n")
 
-    def write_log(self, data: str, name: str="default"):
+    def write_log(self, data: str, name: str = "default"):
         self.write(f"{datetime.datetime.now()}: {data}", name)
 
-    def write_csv(self, data: List, name: str="default"):
+    def write_csv(self, data: List, name: str = "default"):
         self.write(",".join(map(lambda item: str(item), data)), name)
+
 
 # default log
 log = Log()

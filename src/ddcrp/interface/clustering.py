@@ -1,15 +1,18 @@
 import ctypes
-import os
-from typing import List, Set
-
 import numpy as np
+import os
 import scipy as sp
 import scipy.sparse
+from typing import List, Set
 
 lib: ctypes.CDLL = None
+
+
 def loadLibrary(path: str = "./cmake-build-release/libddcrp.so"):
     global lib
     lib = ctypes.cdll.LoadLibrary(path)
+
+
 '''
 uint64 new_state(
         uint64 seed,
@@ -17,6 +20,8 @@ uint64 new_state(
         uint64 dimension
 );
 '''
+
+
 def new_state(seed: int, num_nodes: int, dimension: int) -> int:
     if lib is None:
         loadLibrary()
@@ -25,12 +30,18 @@ def new_state(seed: int, num_nodes: int, dimension: int) -> int:
     dimension: ctypes.c_uint64 = ctypes.c_uint64(dimension)
     state = int(lib.new_state(seed, num_nodes, dimension))
     return state
+
+
 '''
     void del_state(uint64 state_ptr);
 '''
+
+
 def del_state(state: int):
     state: ctypes.c_uint64 = ctypes.c_uint64(state)
     lib.del_state(state)
+
+
 '''
 void iterate_state(
         uint64 state_ptr,
@@ -44,16 +55,18 @@ void iterate_state(
         uint64* cluster_assignment // output assignment: preallocated
 );
 '''
+
+
 def iterate_state(
-            state: int,
-            num_iterations: int,
-            embedding: np.ndarray,
-            logalpha: float,
-            adj: sp.sparse.coo_matrix
-    ) -> np.ndarray:
+        state: int,
+        num_iterations: int,
+        embedding: np.ndarray,
+        logalpha: float,
+        adj: sp.sparse.coo_matrix
+) -> np.ndarray:
     embedding = embedding.astype(np.float64)
     if not embedding.flags.c_contiguous:
-        embedding = np.ascontiguousarray(embedding) # (n x d) row major == (d x n) col major
+        embedding = np.ascontiguousarray(embedding)  # (n x d) row major == (d x n) col major
     adj_row: np.ndarray = adj.row.astype(np.uint64)
     if not adj.row.flags.c_contiguous:
         adj_row = np.ascontiguousarray(adj_row)
@@ -63,7 +76,8 @@ def iterate_state(
     adj_logdecay: np.ndarray = adj.data.astype(np.float64)
     if not adj.data.flags.c_contiguous:
         adj_logdecay = np.ascontiguousarray(adj_logdecay)
-    cluster_assignment: np.ndarray = np.ascontiguousarray(np.zeros((num_iterations, embedding.shape[0]), dtype=np.uint64))
+    cluster_assignment: np.ndarray = np.ascontiguousarray(
+        np.zeros((num_iterations, embedding.shape[0]), dtype=np.uint64))
     # prepare
     state: ctypes.c_uint64 = ctypes.c_uint64(state)
     num_iterations: ctypes.c_uint64 = ctypes.c_uint64(num_iterations)
@@ -73,8 +87,10 @@ def iterate_state(
     adj_row_ptr: ctypes.POINTER(ctypes.c_uint64) = adj_row.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64))
     adj_col_ptr: ctypes.POINTER(ctypes.c_uint64) = adj_col.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64))
     adj_logdecay_ptr: ctypes.POINTER(ctypes.c_double) = adj_logdecay.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-    cluster_assignment_ptr: ctypes.POINTER(ctypes.c_uint64) = cluster_assignment.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64))
+    cluster_assignment_ptr: ctypes.POINTER(ctypes.c_uint64) = cluster_assignment.ctypes.data_as(
+        ctypes.POINTER(ctypes.c_uint64))
 
-    lib.iterate_state(state, num_iterations, embedding_ptr, logalpha, num_edges, adj_row_ptr, adj_col_ptr, adj_logdecay_ptr, cluster_assignment_ptr)
+    lib.iterate_state(state, num_iterations, embedding_ptr, logalpha, num_edges, adj_row_ptr, adj_col_ptr,
+                      adj_logdecay_ptr, cluster_assignment_ptr)
 
     return cluster_assignment

@@ -2,7 +2,8 @@ import networkx as nx
 
 from dataset.loader import Loader
 
-def load_data(dataset_name: str= "email") -> nx.MultiGraph:
+
+def load_data(dataset_name: str = "email") -> nx.MultiGraph:
     loader = Loader(dataset_name=dataset_name)
     g: nx.MultiGraph = nx.MultiGraph()
     for node in loader.nodes():

@@ -1,8 +1,8 @@
-from typing import List, Set, Union
-
+import numpy as np
 import sklearn
 import sklearn.cluster
-import numpy as np
+from typing import List, Set, Union
+
 from src.util import label_to_comm
 
 

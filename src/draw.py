@@ -1,9 +1,8 @@
-from typing import List, Set
-
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
 import scipy.spatial
-import matplotlib.pyplot as plt
+from typing import List, Set
 
 from src.util import linear_regression
 
@@ -17,19 +16,19 @@ def draw_mat(a: np.ndarray, name: str = None):
     plt.clf()
 
 
-def draw_size(size_list: List[int], bins: int = 10, name: str= None, log: bool=False):
+def draw_size(size_list: List[int], bins: int = 10, name: str = None, log: bool = False):
     hist, edges = np.histogram(np.array(size_list), bins=bins)
     centers = []
     for i in range(len(hist)):
-        centers.append((edges[i] + edges[i+1])/2)
+        centers.append((edges[i] + edges[i + 1]) / 2)
     if not log:
         plt.title(name)
         plt.xlabel("cluster size")
         plt.ylabel("occurrences")
         plt.bar(centers, hist, width=(centers[1] - centers[0]))
     else:
-        log_centers = [] # log
-        log_hist = [] # log
+        log_centers = []  # log
+        log_hist = []  # log
         for i in range(len(hist)):
             if hist[i] > 0:
                 log_centers.append(np.log(centers[i]))
@@ -50,14 +49,13 @@ def draw_size(size_list: List[int], bins: int = 10, name: str= None, log: bool=F
         plt.xlabel("log(cluster size)")
         plt.ylabel("log(occurrences)")
 
-
     if name is not None:
         plt.savefig(f"{name}.png")
     plt.show()
     plt.clf()
 
 
-def draw_data(data: np.ndarray, cluster_list: List[Set[int]] = [], name: str= None):
+def draw_data(data: np.ndarray, cluster_list: List[Set[int]] = [], name: str = None):
     plt.title(name)
     plt.scatter(data[:, 0], data[:, 1], s=2)
 
@@ -74,4 +72,3 @@ def draw_data(data: np.ndarray, cluster_list: List[Set[int]] = [], name: str= No
         plt.savefig(f"{name}.png")
     plt.show()
     plt.clf()
-

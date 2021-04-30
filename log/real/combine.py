@@ -1,6 +1,6 @@
-from io import StringIO
-import pandas as pd
 import numpy as np
+import pandas as pd
+from io import StringIO
 
 lines = []
 length = None
@@ -12,8 +12,6 @@ with open("/home/khanh/data.csv") as fp:
         lines.append(",".join(l[:length]))
 
 string = "\n".join(lines)
-
-
 
 TESTDATA = StringIO(string)
 

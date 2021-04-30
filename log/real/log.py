@@ -1,7 +1,8 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from io import StringIO
+
 
 def clean(filepath: str) -> StringIO:
     lines = []
@@ -15,6 +16,7 @@ def clean(filepath: str) -> StringIO:
 
     string = "\n".join(lines)
     return StringIO(string)
+
 
 df = pd.read_csv(clean("./hop_1_window_10_scale_1000.csv"))
 

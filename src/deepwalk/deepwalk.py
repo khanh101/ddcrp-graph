@@ -1,22 +1,22 @@
+import numpy as np
 import os
+from gensim.models import Word2Vec
 from typing import List
 
-import numpy as np
-
-from gensim.models import Word2Vec
-
 workers: int = int(os.popen('grep -c cores /proc/cpuinfo').read())
+
 
 class DeepWalk(object):
     word2vec: Word2Vec
     vocab: bool
+
     def __init__(self, dim: int, context: int):
         super(DeepWalk, self).__init__()
         self.word2vec = Word2Vec(
             size=dim,
             window=context,
-            min_count=1, # minimal frequency count
-            sg=1, # skip gram
+            min_count=1,  # minimal frequency count
+            sg=1,  # skip gram
             workers=workers,
             iter=1,
         )
@@ -39,4 +39,3 @@ class DeepWalk(object):
         )
         vector_list: List[np.ndarray] = [self.word2vec.wv[str(node)] for node in range(num_nodes)]
         return np.array(vector_list)
-

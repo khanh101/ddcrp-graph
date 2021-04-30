@@ -1,8 +1,7 @@
+import networkx as nx
+import numpy as np
 import time
 from typing import List, Set, Any, Dict, Tuple, Union
-
-import numpy as np
-import networkx as nx
 
 from src.ddcrp.interface.DDCRP import DDCRP
 from src.deepwalk.deepwalk import DeepWalk
@@ -18,6 +17,7 @@ class Model(object):
     _deepwalk: DeepWalk
     _ddcrp: DDCRP
     _context: int
+
     def __init__(self, seed: int, num_nodes: int, dim: int, context: int = 5):
         super(Model, self).__init__()
         self._deepwalk = DeepWalk(dim, context)
@@ -27,7 +27,7 @@ class Model(object):
     def deepwalk(
             self,
             g: nx.Graph,
-            deepwalk_epochs: int=10,
+            deepwalk_epochs: int = 10,
     ) -> np.ndarray:
         # deepwalk
         walks_per_node: int = int(2 * g.number_of_edges() / g.number_of_nodes())
@@ -44,8 +44,8 @@ class Model(object):
             self,
             g: nx.Graph,
             embedding: np.ndarray,
-            ddcrp_iterations: int=10,
-            ddcrp_logalpha: float= -float("inf"),
+            ddcrp_iterations: int = 10,
+            ddcrp_logalpha: float = -float("inf"),
             receptive_hop: int = 1,
             ddcrp_scale: float = 5000,
     ) -> List[List[Set[int]]]:
@@ -72,7 +72,8 @@ class Model(object):
         return comm_list
 
     @staticmethod
-    def mcla(comm_list: List[List[Set[int]]], reference: List[Set[int]] = None) -> Tuple[List[Set[int]], List[Set[int]]]:
+    def mcla(comm_list: List[List[Set[int]]], reference: List[Set[int]] = None) -> Tuple[
+        List[Set[int]], List[Set[int]]]:
         # mcla
         next_comm: List[Set[int]] = []
         for comm in comm_list:

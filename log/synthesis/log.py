@@ -1,14 +1,17 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 
 def filter(df0: pd.DataFrame, attr: str, value: float, range: float = 0.1):
-    return filter_range(df0, attr, value*(1-range), value*(1+range))
+    return filter_range(df0, attr, value * (1 - range), value * (1 + range))
+
 
 def filter_range(df0: pd.DataFrame, attr: str, lower: float, upper):
     df1 = df0[df0[attr] >= lower]
-    df2 = df1[df1[attr] <  upper]
+    df2 = df1[df1[attr] < upper]
     return df2
+
 
 df = pd.read_csv("./log.csv")
 
@@ -48,7 +51,7 @@ y = []
 step = 10
 minx = 0
 maxx = 300
-for i in range(minx, 1+maxx, step):
+for i in range(minx, 1 + maxx, step):
     j = i + step
     df1 = filter_range(df, "predicted cluster size", i, j)
     x.append((i + j) / 2)
@@ -63,12 +66,10 @@ plt.plot([50, 50], [0.8, 1.5], 'black')
 plt.plot(x, y)
 plt.show()
 
-
 for average_degree in [10, 20, 30, 40, 50]:
     df1 = filter(df, "average degree", average_degree)
-    x = (np.sqrt(1/df1["scale"])**50) * df1["graph size"]
+    x = (np.sqrt(1 / df1["scale"]) ** 50) * df1["graph size"]
     y = df1["predicted cluster size"]
 
     plt.scatter(average_degree * np.log(x), np.log(y))
 plt.show()
-
