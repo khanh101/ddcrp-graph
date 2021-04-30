@@ -1,0 +1,66 @@
+Random-walk-based method treats the network as a collection of node walks and the algorithm operates on this collection.
+
+Bryan Perozz et al adopted \emph{SkipGram} \cite{mikolov2013distributed} from natural language processing and proposed \emph{Deepwalk} \cite{perozzi2014deepwalk}. The authors observed a power-law property in the distribution of nodes in short random walks and the distribution of words in documents. Then, they performed random-walk on graph data then used these short walks to train the SkipGram objective.
+
+\begin{equation}
+    \frac{1}{T} \sum_{t=1}^T \sum_{-c \leq i \leq +c, i \neq 0} log(P(w_{t+i} | w_t))
+\end{equation}
+
+\begin{equation}
+    P(w_c | w_t) = \frac{exp(v_c^{'T} v_t)}{\sum_{w_i \in W} exp(v_i^{'T} v_t)}
+    \label{eq:softmax}
+\end{equation}
+
+Where $w_i$ denotes the $i$-th word in a sentence, $T$ denotes the length of that sentences, $c$ denotes the context size. $P(w_c | w)$ is the probability of a context word given a word. $v_c^{'}$ and $v_t$ are the corresponding context embedding vector and the word embedding vector.
+
+In summary, \emph{SkipGram} maximizes the log-likelihood of the occurrences of context words given a word and \emph{Deepwalk} replaces  word by node in a binary edge network. Their contribution motivates many subsequent studies on the random walks.
+
+Aditya Grover and June Leskovec (\emph{node2vec}) extended \emph{Deepwalk} by providing two tunable parameters $p$ and $q$ guiding the random walk process that balances between depth-first-search and breath-first-search corresponding to homophily as opposed to structural equivalence. Their random walk process was described as: Consider a walk just traversed from $a$ to $b$, let the next node in the walk be $c$, then the transition probability is as below:
+
+\begin{equation}
+     P((..., a, b, c) | p, q, (..., a, b)) \propto \left\{
+    \begin{array}{ll}
+        \frac{1}{p} \;\;\; \text{if $d_{a, c} = 0$} \\
+        1  \;\;\; \text{if $d_{a, c} = 1$} \\
+        \frac{1}{q} \;\;\; \text{if $d_{a, c} = 2$}
+    \end{array}
+    \right.
+\end{equation}
+
+Where $d_{a, c}$ is the shortest distance from node $a$ to node $c$. By setting $1/p \to 0$, the random walk becomes first-order non-backtracking which is described in \cite{krzakala2013spectral}. By setting $1/q \to 0$, the random walk tends to traverse to the direct neighbours of node $a$. By setting $1/q \to +\infty$, the random walk tends to traverse as far as possible.
+
+In \emph{LINE} \cite{tang2015line}, Jian Tang et al proposed two optimization objectives called first-order proximity and second-order proximity. First-order proximity models the presence of an edge $(v_i, v_j)$ by $p_1(v_i, v_j)$:
+
+\begin{equation}
+    p_1(v_i, v_j) = \frac{1}{1 + exp(-u_i^T u_j)}
+\end{equation}
+
+In order to produce a good node representation, they minimized the KL-divergence between the empirical distribution edge weights $w_{i, j}$ and the first-order proximity $p_1(v_i, v_j)$ which resulted to:
+
+\begin{equation}
+    O_1 = - \sum_{(i, j) \in E} w_{i, j} p_1(v_i, v_j)
+\end{equation}
+
+Second-order proximity models the prestige of a node $\lambda_i$ by $p_2(\cdot | v_i)$. Each node plays two role: \emph{vertex} and \emph{context} to over vertices. They defined the probability of \emph{context} $v_j$ over \emph{vertex} $v_j$ as:
+\begin{equation}
+    p_2(v_j | v_i) = \frac{exp(u_j^{'T} u_i)}{\sum_{k=1}^{|V|} exp(u_k^{'T} u_i)}
+\end{equation}
+
+\begin{equation}
+    p_2(\cdot | v_i) = \prod_{v_j \in V} p_2(v_j | v_i)
+\end{equation}
+
+Similar to first-order proximity, they minimized the KL-divergence between the empirical distribution prestige of a node $\lambda_i$ and the second proximity $p_2(\cdot | v_i)$. They chose the prestige of a node by its degree so that the objective was reduced to:
+
+\begin{equation}
+    O_2 = - \sum_{directed (i, j) \in E} w_{i, j} p_2(v_i | v_j)
+\end{equation}
+
+Finally, in order to manage the weighted graph, they proposed an edge sampling scheme where probability is proportional to the edge weight.
+
+
+It also is worth to mention the two techniques to approximate the full softmax (equation \ref{eq:softmax}) has been used in \emph{SkipGram} model: \emph{hierarchical softmax} \cite{morin2005hierarchical} and \emph{negative sampling} \cite{gutmann2012noise} \cite{mikolov2013distributed}. \emph{Hierarchical softmax} handles the calculation of full softmax by a binary tree that reduces the time complexity of the calculation on the probability of vertex given context from $O(V)$ to $O(logV)$. \emph{Negative sampling} on the other hand, approximate the probability of vertex given context by sampling the negative edges according to a noise distribution $P_n(v)$. The \emph{negative sampling} objective is used to replace all $P(w_c | w)$ in the $SkipGram$ model.
+
+\begin{equation}
+    log \sigma (v_c^{'T} v) + \sum_{i=1}^K \mathbf{E}_{v_i \sim P_n(v)}[log \sigma (-v_i^{'T} v)] 
+\end{equation}

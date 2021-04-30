@@ -1,0 +1,21 @@
+Hybrid embedding discussed in this section is the embedding of nodes and clusters together.
+
+The two hybrid embedding techniques is being discussed in this section are ComE  and ComE+  which both are the work of Sandro Cavallar et al.
+
+In \emph{ComE} \cite{cavallari2017learning}, the node embedding (LINE \cite{tang2015line}) and community embedding are jointly optimized together. Community embedding objective used in \emph{ComE} was the likelihood of a gaussian mixture.
+
+\begin{equation}
+    O_3 = -\frac{\beta}{K} \sum_{i=1}^{|V|} log \sum_{k=1}^{K} \pi_{ik} \mathcal{N}(\phi_i | \psi_k, \Sigma_k)
+    \label{eq:come_comm}
+\end{equation}
+
+It is noteworthy that, maximizing community embedding log likelihood of GMM was relaxed using log concavity. The objective at equation \ref{eq:come_comm} was replaced by:
+
+\begin{equation}
+    O_3^{'} = -\frac{\beta}{K} \sum_{i=1}^{|V|} \sum_{k=1}^{K} log \pi_{ik} \mathcal{N}(\phi_i | \psi_k, \Sigma_k)
+\end{equation}
+
+
+In \emph{ComE+} \cite{cavallari2019embedding}, they extended the work of \emph{ComE} by employing an infinite number of clusters model \emph{IGM} \cite{rasmussen2000infinite} using stick-breaking process. Then, they adopted the variational inference approach \cite{blei2006variational} to cast the maximum posterior problem of detecting community into a minimization of the KL divergence between variational distribution and the posterior.
+
+Hybrid embedding usually has their advantages on their predefined problem. Hence, they are not applicable to produce a meaningful embedding for the general problem. \cite{grover2016node2vec}

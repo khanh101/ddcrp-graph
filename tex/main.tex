@@ -1,0 +1,65 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+
+% TODO
+\usepackage{xcolor}
+\newcommand\todo[1]{\textcolor{red}{#1}}
+
+
+% at numbering for paragraph
+\usepackage{titlesec}
+\setcounter{secnumdepth}{5}
+
+% bib
+\usepackage{natbib}
+\bibliographystyle{plain}
+
+% algorithm
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% definition
+\usepackage{amsthm}
+\newtheorem{definition}{Definition}
+\newtheorem{hypothesis}{Hypothesis}
+
+% text in math
+\usepackage{amsmath}
+
+% graphic
+\usepackage{graphicx}
+
+
+\title{fyp}
+\author{nguyenngockhanh.pbc }
+\date{October 2020}
+
+
+
+
+\begin{document}
+\input{report/cover}
+
+
+
+\begin{abstract}
+\input{report/abstract}
+\end{abstract}
+
+\renewcommand{\abstractname}{Acknowledgements}
+\begin{abstract}
+\input{report/acknowledgement}
+\end{abstract}
+
+\tableofcontents
+\listoffigures
+
+\input{report/introduction}
+\input{report/literature/literature}
+\input{report/method/method}
+\input{report/experiment}
+\input{report/conclusion}
+
+\bibliography{report/references}
+\input{report/appendix}
+\end{document}

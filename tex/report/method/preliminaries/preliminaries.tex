@@ -1,0 +1,70 @@
+\subsection{Node Embedding}
+
+\begin{definition}[Node Embedding]
+Given a weighted undirected graph $G = (V, E, w)$ where $V$ is the set of vertices, $E \subseteq V \times V$ is the set of edges, and $w: V \times V \mapsto R^+$ is the edge weight. A node embedding of dimension $d$ is a function $u: V \mapsto R^d$ that maps each vertex to a vector.
+\end{definition}
+
+\input{report/method/preliminaries/deepwalk}
+
+\newpage
+\subsection{Community Detection}
+\begin{definition}[Community Detection]
+Given a graph $G = (V, E)$ and a node embedding $X \in R^{n \times d}$. Define a partition $P$ of $V$ is a set of disjoint non-empty subsets of $V$ such that union of $P$ elements is $V$.
+
+$P = \{P_k\}_{k=1}^{K}$ where
+\begin{itemize}
+\item $P_k \neq \emptyset$
+\item $\cup_{k=1}^{K} P_k = V$
+\item $P_i \cap P_j = \emptyset$ for all $P_i \neq P_j$
+\end{itemize}
+
+A community detection algorithm returns a partition of vertices.
+\end{definition}
+
+\input{report/method/preliminaries/ddcrp}
+
+\newpage
+\subsection{Cluster Ensemble}
+
+\begin{definition}[Meta-Graph \cite{strehl2002cluster}]
+Given a set of $U$ of $n$ elements, a clustering result is defined as a family of clusters/subsets of $U$: $C \subseteq \mathcal{P}(U)$. Each meta-node is defined as an element $c$ of $C$. Construct meta-edge by the Jaccard similarity (intersection over union): $w_{i, j} = \frac{|c_i \cap c_j|}{|c_i \cup c_j|}$
+\label{def:meta_graph}
+\end{definition}
+
+
+ Alexander Strehl and Joydeep Ghosh \cite{strehl2002cluster} introduced an algorithm to ensemble clustering results namely MCLA algorithm based on the concept of the \emph{Meta-Graph}. The algorithm consists of four major steps.
+ \begin{enumerate}
+     \item Construct the \emph{Meta-Graph} from clustering.
+     \item Partition the \emph{Meta-Graph} into K-balance meta-clusters.
+     \item Construct the probability of a given node belongs to a meta-cluster by averaging all clusters.
+     \item For each node, decide its corresponding meta-cluster based on the calculated probability.
+ \end{enumerate}
+ 
+ 
+ \newpage
+ \subsection{Data marginal likelihood}
+ 
+Assuming data points distribute according to a Gaussian, choosing the Normal-inverse-Wishart (NIW) prior, the data marginal likelihood is hence calculated according to Kevin P. Murphy work \cite{murphy2007conjugate} (page 21).
+
+\begin{equation}
+    P(\mu, \Sigma | D) = NIW(\mu, \Sigma | m_N, k_N, v_N, S_N)
+\end{equation}
+\begin{equation}
+    k_N = k_0 + N
+\end{equation}
+\begin{equation}
+    v_N = v_0 + N
+\end{equation}
+\begin{equation}
+    m_N = \frac{k_0 m_0 + N\overline{x}}{k_N}
+\end{equation}
+\begin{equation}
+    S_N = S_0 + S + k_0 m_0 m_0^T - k_N m_N m_N^T
+\end{equation}
+
+\begin{equation}
+    P(D) = \frac{1}{\pi^{Nd/2}} \frac{\Gamma_d(v_N/2)}{\Gamma_d(v_0/2)} \frac{|S_0|^{v_0/2}}{|S_N|^{v_N/2}} (\frac{k_0}{k_N})^{d/2}
+    \label{eq:table_likelihood}
+\end{equation}
+
+Where $S\overset{\Delta}{=} \sum_{i=1}^N x_ix_i^T$ as the uncentered sum-of-squares matrix.

@@ -1,0 +1,43 @@
+Different from the traditional \emph{Chinese Restaurant Process} (\emph{CRP}), in the work of  David M. Blei and Peter I. Frazier on \emph{distance dependent Chinese Restaurant Process}, \emph{ddCRP} \cite{blei2011distance} generalized the sitting arrangement of customers by a unweighted directed graph. Each vertex is corresponding to a customer, each weakly connected component is corresponding to a table. In this model, each vertex either links to another vertex or links to itself. Let $z$ be the vector represent the linking process such that $z[i]$ is the customer that customer $i$ links to. Then, \emph{ddCRP} defines the conditional probability as follow \cite{blei2011distance}:
+
+\begin{equation}
+     P(z[i] = j \;|\; z[0:i-1], \alpha) \propto \left\{
+    \begin{array}{ll}
+        \alpha \;\;\;\;\;\;\;\;\;\;\; \text{if $j = i$}\\
+        f(i, j) \;\;\;\; \text{if $j \neq i$}\\
+    \end{array}
+    \right.
+    \label{eq:ddcrp}
+\end{equation}
+
+Where $\alpha$ is the concentration parameter and $f(i, j)$ is defined as the decay function. The decay function controls the probability of two customers sitting in the same table. If the decay function equals 1 for every pair of customers, the model is equivalent to the traditional \emph{CRP}.
+
+Let $x$ be the observations. In Gibbs sampling, each latent variable is sampled given all other latent variables being observed. The Gibbs sampling probability is as thus \cite{blei2011distance}:
+
+\begin{equation}
+    P(z[i] = j | (z - z[i]), \alpha, x, G_0) \propto P(x | (z - z[i] + j), G_0) P(z[i] = j | (z - z[i]), \alpha)
+    \label{eq:gibbs_fac}
+\end{equation}
+
+Where $(z - z[i])$ denotes the customer assignment without $z[i]$,  $(z - z[i] + j)$ denotes the customer assignment where $z[i]$ is replaced by $j$. $G_0$ denotes the prior distribution on $x$.
+
+The first term is the likelihood of data given the new customer assignment $(z - z[i] + j)$ and prior $G_0$. The second term  is \emph{ddCRP} process probability (equation \ref{eq:ddcrp}). The authors of \cite{blei2011distance} factorized the first term into a product of each table likelihood.
+
+\begin{equation}
+    P(x | (z - z[i] + j), G_0) = \prod_{t \in T} P(x_t | G_0)
+\end{equation}
+
+Where $T$ is the set of tables. This leads to an efficient Gibbs sampling scheme:
+
+\begin{equation}
+     P(z[i] = j \;|\; (z - z[i]), \alpha, x, G_0) \propto \left\{
+    \begin{array}{ll}
+        \alpha \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; \text{if $j = i$}\\
+        f(i, j) \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; \text{if $j \neq i$ and no table join}\\
+        f(i, j) \frac{P(x_{t_{ij}} | G_0)}{P(x_{t_i} | G_0) P(x_{t_j} | G)} \;\;\; \text{if $j \neq i$ and  table join}\\
+    \end{array}
+    \right.
+    \label{eq:gibbs}
+\end{equation}
+
+Where $t_i$ and $t_j$ is the table of customer $i$ and $j$, $t_{ij}$ is the join table.

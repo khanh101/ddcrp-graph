@@ -1,0 +1,9 @@
+A classic technique for graph clustering is spectral clustering which is introduced comprehensively in the textbook of Fan Chung \cite{chung1997spectral}. The spectral methods typically using several eigen vectors corresponding to the set of smallest eigenvalues on normalized Laplacian matrix that provide an embedding of nodes satisfying the optimality on the chosen objective \footnote{Ratio cut, Normalized cut, Min-Max cut, etc}.
+
+Recently, A. Saade et al introduced Bethe-Hessian matrix \cite{saade2014spectral} for spectral clustering that is provable to  perform down to the detect-ability threshold under stochastic block model \cite{massoulie2014community} which is related to the \emph{non-backtracking operator} firstly published by Florent Krzakala et al \cite{krzakala2013spectral}. Later, another study from Lorenzo \cite{dall2019revisiting} extended A. Saade et al work for degree corrected stochastic block model.
+
+Later on, which is inspired by the \emph{non-backtracking operator}, Fei Jiang at al \cite{jiang2018spectral} published a novel edge embedding framework called \emph{NOBE} which has a superior clustering performance comparing to many state of the art node embedding algorithms.
+
+However, one disadvantage of spectral clustering is that it suffers from the high computational complexity since the algorithm is based on the estimation of eigen vectors. Nonetheless, it might be more applicable in the future with the work on randomized algorithms in numerical linear algebra \cite{kannan2017randomized} and the advancement in engineering \cite{tulloch_2016}.
+
+To wrap up this section, Marina Meila and Jianbo Shi \cite{meila2001learning} \cite{meila2001random}, Pekka Orponen, Satu Elisa Schaeffer, and Vanesa Avalos Gaytan \cite{orponen2008locally} have demonstrated the relationship between spectral clustering and random walk on graph. Hence, exploiting the short random walks in graph is a very promising approach to explore.

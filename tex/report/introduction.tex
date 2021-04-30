@@ -1,0 +1,27 @@
+\chapter{Introduction}
+
+\section{Background}
+
+\begin{center}
+\emph{The emergence of Dynamic Graph Clustering Problem.}
+\end{center}
+
+Network has been a powerful tool to model many complex systems across different fields such as telecommunications, computer networks, biological systems, knowledge representation, social network analysis. Such networks have many surprisingly similar properties. Hence, network science aims to study the complex networks that provides a universal framework to describe complex data, handles the emergence of big data era and contributes a huge impact to many different applications.
+
+Under network analysis, graph clustering is a commonly used tool. For example, graph clustering helps to distribute cache servers to densely connected groups of users in a computer network that minimizes cache misses, graph clustering helps to optimize the transportation schedule by finding the inter-cluster links, graph clustering helps ads providers to target the most related ads to users. The analysis of graph clustering aims to decompose the network into multiple disjoint clusters. Clusters in network are usually defined as the densely connected groups of nodes and have a sparse connectivity between them. The study of clustering reveals the common properties of a collection of entities especially for large and complex data-sets.
+
+Graph clustering has been studied for a long time, most of the research has been focused on the static graph problem. However, many real networks are dynamic where nodes and edges can appear and disappear over time and they are becoming more common in everyday life but the evolution of clustering property has not been considered rigorously.
+
+It is although not a trivial task to convert a static graph clustering algorithm to a dynamic context. Since number of changes are usually much larger than number of nodes \cite{leskovec2014snap}, static graph clustering algorithms usually suffers from intractable computation. There is a need of developing algorithms that is capable to adapt to changes in dynamic networks.
+
+\section{Objectives}
+\begin{center}
+\emph{The study of Dynamic Graph Clustering}
+\end{center}
+
+This project aims to improve a graph clustering algorithm and apply it in the context of dynamic graph. The work consists of studying node embedding techniques and clustering techniques, designing the dynamic graph clustering algorithm and evaluating the algorithm in both synthetic networks and real dynamic networks.
+
+
+\section{Research Significance}
+
+This study introduced two new algorithms: \emph{ddCRP} for graphs and \emph{MCLA} for clustering evolution detection that are applicable to detect the presence of community structure for weighted undirected networks in both static and dynamic settings. Furthermore, we constructed an efficient implementation of the \emph{ddCRP} algorithm for graphs and analyzed its time complexity in the order of receptive field and cluster size per each Gibbs update.

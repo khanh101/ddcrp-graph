@@ -1,0 +1,11 @@
+Matrix factorization aims to represent the graph as a matrix of neighbourhood proximity and use matrix factorization techniques to obtain the node embedding.
+
+The most well-known technique is Laplacian Eigenmaps which factorizes the Laplacian matrix and get top-$d$ the eigen vectors as the embedding of nodes. 
+
+The other method we wanted to discuss in this section is \emph{Graph Factorization} \cite{ahmed2013distributed}. The authors adopted stochastic gradient descent to approximate a maximum rank-$d$ matrix of the adjacency with a regularization term that penalizes L2 norm.
+
+\begin{equation}
+    f(Y, Z, \lambda) = \frac{1}{2} \sum_{(i, j) \in E} (Y_{i, j} - \langle Z_i, Z_j \rangle)^2 + \frac{\lambda}{2} \sum_i ||Z_i||^2
+\end{equation}
+
+Where $Y \in R^{|V| \times |V|}$ is the proximity matrix (adjacency matrix) and $Z \in R^{|V| \times d}$, each row vector of $Z$ is an embedding vector of the corresponding node.

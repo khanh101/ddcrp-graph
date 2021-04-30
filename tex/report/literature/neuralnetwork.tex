@@ -1,0 +1,15 @@
+The study of neural network on graph has emerged in recent years. Many proposed solution to graph problems are inspired by Convolutional Neural Network (CNN).
+
+In \emph{Graph Convolutional Network} (\emph{GCN}) \cite{kipf2016semi}, each layer weighted aggregates a node neighbourhood embedding vector \footnote{the weight depends on the respective kernel}, then filtered by a linear layer. The propagation rule is described as below:
+
+\begin{equation}
+    H^{(l+1)} = \sigma (\widetilde{D}^{-1/2} \widetilde{A} \widetilde{D}^{-1/2} H^{(l)} W^{(l)} + b^{(l)})
+\end{equation}
+
+Where $\widetilde{A} = A + I$, $A$ is the adjacency. $\widetilde{D}_{ij} = \sum_j \widetilde{A}_{ij}$. $H^{(l)} \in R^{|V| \times d^{(l)}}$ is the representation at layer $(l)$, $d^{(l)}$ is the dimension at layer $(l)$. $W^{(l)}$ and $b^{(l)}$ are weight and bias terms at layer $(l)$. $\sigma(\cdot)$ is the activation.
+
+Later on, Difan Zou et al \cite{zou2019layer} improved the calculation on \emph{GCN} by making use of selective sampling for each layer. \emph{LADIES}. In node classification task, stochastic gradient descent only use a subset of nodes to train the model. Hence, in order to save the calculation step, they used a sampled kernel matrix which only has the corresponding neighbours that are related to the set of labeled nodes.
+
+In \emph{Gaussian-Induced Convolution}, Jiatao Jiang \cite{jiang2019gaussian} proposed a novel method that utilizes both first-order statistics (mean) and second-order statistics (variance). The two presented types of layer are Convolution: Edge-Induced GMM and Coarsening: vertex-induced GMM. In edge induced GMM, inspired by the work on \emph{Fisher vector} \cite{sanchez2013image}, each vertex embedding is calculated based on the derivative of probability density of the receptive field w.r.t a gaussian mixture. It exploits the local information w.r.t to a node using the concept of receptive field in graph. In vertex induced GMM, vertices are partitioned using EM algorithm on GMM. It reduced the computational complexity by looking to the graph in a more global view as merging the nodes into clusters. It is important to highlight that, in vertex partitioning using GMM, the kernel trick has been used in order to reduce the main calculation of the algorithm.
+
+Despite the success of neural network, neural network on graph is typically suitable for supervised learning tasks. In order to solve the unsupervised tasks where no label is provided, an autoencoder often takes place with careful designed regularization constraints on the hidden embedding which typically requires the expert experience.

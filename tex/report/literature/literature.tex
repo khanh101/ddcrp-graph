@@ -1,0 +1,60 @@
+\chapter{Related Work}
+
+A few approximation techniques for the graph clustering problem that inspired our approach will be discussed in this chapter.
+
+\section{Spectral Graph Clustering}
+
+\input{report/literature/spectral}
+
+
+\newpage
+\section{Graph Embedding}
+
+Graph embedding falls into four different categories \cite{cai2018comprehensive}: \emph{node embedding}, \emph{edge embedding}, \emph{hybrid embedding} and \emph{whole graph embedding}. Nodes, edges or graph are typically represented by a point in Euclidean space. In this section, we will focus on node embedding and hybrid embedding only.
+
+\subsection{Node Embedding}
+
+In \emph{node embedding}, each node is represented as a vector in a small $d$-dimensional Euclidean space. The common proximity measures are Euclidean norm or inner product.
+
+
+\subsubsection{Matrix Factorization}
+
+\input{report/literature/matrixfactorization}
+
+\newpage
+\subsubsection{Random-walk-based and SkipGram}
+
+\input{report/literature/skipgram}
+
+
+\newpage
+\subsubsection{Neural Network}
+
+\input{report/literature/neuralnetwork}
+
+\newpage
+\subsection{Hybrid Embedding}
+
+\input{report/literature/come}
+
+\newpage
+\section{Dynamic Graph Clustering}
+
+With regard to Dynamic Graph Clustering, Giulio Rossetti et al \cite{rossetti2018community} published a comprehensive survey on techniques have been used. They classified operations in dynamic graph clustering evolution are as follow:
+
+\begin{itemize}
+    \item Birth (New): First appearance of a cluster.
+    \item Death: The vanishing of a cluster.
+    \item Merge (Join): Two or more clusters merge into one.
+    \item Split: One cluster splits into two or more components.
+    \item Resurgence: A community vanishes for a short period and comes back.
+    \item Grow: A cluster accepts nodes.
+    \item Contraction: A cluster rejects nodes.
+    \item Continue: A cluster remains unchanged.
+\end{itemize}
+
+\newpage
+\section{Relation to our work}
+
+\input{report/literature/relation}
+

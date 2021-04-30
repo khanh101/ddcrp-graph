@@ -1,0 +1,81 @@
+\emph{Deepwalk} \cite{perozzi2014deepwalk} was empirically provable to produce a meaningful representation of nodes for unweighted directed graph. The detailed algorithm is as follow:
+
+\begin{algorithm}[H]
+\caption{Deepwalk}
+\textbf{Input:}\\
+    $G = (V, E, w)$: Undirected weighted graph \\
+    $d$: Embedding dimension \\
+    $c$: Context size \\
+    $\gamma$ Walks per vertex\\
+    $l$: Walk length\\
+
+\textbf{Output:}\\
+    $X \in R^{|V| \times d}$: Node embedding\\
+
+\begin{algorithmic}
+\State \textbf{Initialization:} Sample X
+\For{$i$ = $1$ to $\gamma$}
+    \State $O$ = Shuffle($V$)
+    \For{$v \in O$}
+        \State $walk$ = RandomWalk($G$, $v$, $l$)
+        \State SkipGram($X$, $walk$, $c$)
+    \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{SkipGram}
+\textbf{Input:}\\
+    $X$: node embedding \\
+    $walk$: walk, an array of vertices \\
+    $c$: Context size \\
+
+\begin{algorithmic}
+\For{$v_i \in walk$} \Comment{$v_i$ is the i-th item in the array}
+    \For{$v_j \in walk[i-c, i+c]$} \Comment{array[a, b] is the subarray}
+        \State $J(X) = -log(Pr(u'_j | u_i))$
+        \State $X = X - \alpha \frac{\partial J}{\partial X}$
+        
+    \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{RandomWalk}
+\textbf{Input:}\\
+    $G = (V, E, w)$: Undirected weighted graph \\
+    $v_1$: Start vertex \\
+    $l$: Walk length\\
+
+\textbf{Output:}\\
+    $walk$: walk\\
+
+\begin{algorithmic}
+\State $walk = [v_1]$
+\While{$walk.length() < l$}
+    \State $v = Choose(G, walk[-1])$ \Comment{$array[-1]$ is the last item of the array}
+    \State $walk.push\_back(v)$
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+$Choose$ function returns a uniformly random out-going neighbour of the input node. Formally,
+
+\begin{equation}
+    ChooseProbability(v_j | v_i) \propto \left\{
+        \begin{array}{ll}
+            1 \;\;\;\; \text{if $(v_i, v_j) \in E$}\\
+            0 \;\;\;\; \text{otherwise}
+        \end{array}
+    \right.
+\end{equation}
+
+Probability of context $j$ given vertex $i$ is given by \cite{mikolov2013distributed}:
+
+\begin{equation}
+    Pr(u'_j|u_i) = \frac{exp(u_j^{'T} u_i)}{\sum_{k=1}^{|V|} exp(u_k^{'T} u_i)}
+\end{equation}
+
+Where $u'_i$ and $u_i$ are the embedding of vertex $v_i$ when it is treated as "context" and "vertex" respectively.

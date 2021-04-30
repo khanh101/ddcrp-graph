@@ -1,0 +1,63 @@
+\chapter{Appendix}
+
+\begin{proof}[Proof of \ref{eq:gibbs_fac}]:\
+\[
+P(A|BCD) = \frac{P(ABCD)}{P(BCD)}
+\]
+\[
+P(ABCD) = P(C|ABD)P(ABD)
+\]
+Assume that A and D are independent, B and D are independent.
+\[
+P(ABD) = P(AB)P(D) = P(A|B)P(B)P(D)
+\]
+\[
+P(A|BCD) = \frac{P(C|ABD)P(A|B)P(B)P(D)}{P(BCD)}
+\]
+
+Let $A$ be $z[i] = j$, $B$ be $((z-z[i]), \alpha)$, $x$ be C and $G_0$ be D. We have:
+
+\begin{equation}
+    P(z[i] = j | (z - z[i]), \alpha, x, G_0) \propto P(x | (z - z[i] + j), \alpha, G_0)P(z[i] = j | (z - z[i]), \alpha)
+\end{equation}
+
+
+We have $x$ and $\alpha$ are independent,
+\begin{equation}
+    P(x | (z - z[i] + j), \alpha, G_0) = P(x | (z - z[i] + j),G_0)
+\end{equation}
+
+QED
+
+\end{proof}
+
+\begin{proof}[Proof of Algorithm \ref{alg:powerlaw}]:\
+
+Let $X \sim \mathcal{U}(0, 1)$
+
+
+For convenience, we treat $P[x \in [a, b]] = -P[x \in [b, a]]$, $P[x \in [a, b]]$ is positive when $a < b$
+
+Define probability density of $X$ as $d_X(x = x_0) = \lim_{\Delta x \to 0} \frac{P[x \in [x_0, x_0 + \Delta x]]}{\Delta x}$
+
+
+Let $Y = X^\delta$, we have:
+
+$d_Y(y = y_0) = \lim_{\Delta y \to 0} \frac{P[y \in [y_0, y_0 + \Delta y]]}{\Delta y}$
+
+Let $y_1 = x_1^\delta$, hence
+$y_1 + \Delta y = (x_1 + \Delta x)^\delta = x_1^\delta + \delta x_1^{\delta - 1} \Delta x + \sum_{i = 2}^{+\infty} \frac{f^{(i)}(x_1) \Delta x^i}{i!}$
+
+Or $\Delta y = \delta x_1^{\delta - 1} \Delta x + \sum_{i = 2}^{+\infty} \frac{f^{(i)}(x1) \Delta x^i}{i!}$
+
+$d_Y(y = y_1) = \lim_{\Delta y \to 0} \frac{P[y \in [y_1, y_1 + \Delta y]]}{\Delta y} = \lim_{\Delta y \to 0} \frac{P[x \in [x_1, x_1 + \Delta x]]}{\Delta y} = \lim_{\Delta y \to 0} \frac{\Delta x}{\Delta y}$
+
+$d_Y(y = y_0) = \lim_{\Delta x \to 0} \frac{1}{\delta x_1^{\delta - 1} + \sum_{i = 2}^{+\infty} \frac{f^{(i)}(x_1) \Delta x^{i-1}}{i!}} = \frac{1}{\delta} x_1^{1 - \delta}$
+
+$d_Y(y = y_0) = \frac{1}{\delta} x_1^{1 - \delta} = \frac{1}{\delta} (y_1^{1/\delta})^{1 - \delta} = \frac{1}{\delta} y_1^{(1 - \delta)/\delta}$
+
+Choose $\delta = \frac{1}{1-\gamma}$, so $d_Y(y = y_0) \propto y^{-\gamma}$
+
+QED
+
+\end{proof}
